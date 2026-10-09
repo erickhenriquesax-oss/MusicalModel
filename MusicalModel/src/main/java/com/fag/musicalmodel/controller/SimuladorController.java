@@ -23,7 +23,6 @@ public class SimuladorController {
     @GetMapping("/{id}")
     public ResponseEntity<SimuladorModel> getSimuladorByIdUsuario(@PathVariable Long id) {
         SimuladorModel simulador = simuladorService.getSimuladorByUsuarioModel_IdUsuario(id);
-
         return ResponseEntity.ok(simulador);
     }
 }

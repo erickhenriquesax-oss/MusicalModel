@@ -5,9 +5,13 @@ import com.fag.musicalmodel.model.SimuladorModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface CanalRepository extends JpaRepository<CanalModel, Long> {
 
     CanalModel findCanalModelByIdCanal(Long id);
+    List<CanalModel> findBySimuladorModel_IdSimulador(Long id);
 
 
 }
