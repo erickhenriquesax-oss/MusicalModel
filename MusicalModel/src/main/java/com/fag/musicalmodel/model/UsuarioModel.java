@@ -42,13 +42,13 @@ public class UsuarioModel implements Serializable {
     private String endereco;
 
     @Column(length = 6)
-    private String numero;
+    private Long numero;
 
     @Column(length = 50)
     private String complemento;
 
     @Column(length = 13)
-    private String telefone;
+    private Long telefone;
 
     @Column()
     private boolean assinatura;
@@ -63,7 +63,7 @@ public class UsuarioModel implements Serializable {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "-id_instrumento")
+    @JoinColumn(name = "id_instrumento")
     private InstrumentoModel instrumentoModel;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

@@ -1,13 +1,10 @@
 package com.fag.musicalmodel.service;
 
 
-import com.fag.musicalmodel.dto.InstrumentoDto;
 import com.fag.musicalmodel.dto.TipoUsuarioDto;
-import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.repository.TipoUsuarioRepository;
 import jakarta.transaction.Transactional;
-import org.hibernate.tool.schema.spi.ExceptionHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
