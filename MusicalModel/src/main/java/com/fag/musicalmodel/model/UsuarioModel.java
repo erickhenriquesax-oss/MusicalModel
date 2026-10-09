@@ -48,7 +48,7 @@ public class UsuarioModel implements Serializable {
     private String complemento;
 
     @Column(length = 13)
-    private Long telefone;
+    private String telefone;
 
     @Column()
     private boolean assinatura;

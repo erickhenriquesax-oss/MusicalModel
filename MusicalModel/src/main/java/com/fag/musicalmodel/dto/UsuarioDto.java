@@ -9,7 +9,7 @@ public record UsuarioDto(
         String cpf,
         String cep,
         String endereco,
-        Long telefone,
+        String telefone,
         Long idInstrumento,
         String complemento,
         String nome,

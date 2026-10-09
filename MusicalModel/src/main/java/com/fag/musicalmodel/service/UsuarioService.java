@@ -3,9 +3,11 @@ package com.fag.musicalmodel.service;
 
 import com.fag.musicalmodel.dto.UsuarioDto;
 import com.fag.musicalmodel.model.InstrumentoModel;
+import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.model.UsuarioModel;
 import com.fag.musicalmodel.repository.InstrumentoRepository;
+import com.fag.musicalmodel.repository.SimuladorRepository;
 import com.fag.musicalmodel.repository.TipoUsuarioRepository;
 import com.fag.musicalmodel.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -19,11 +21,13 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final InstrumentoRepository instrumentoRepository;
     private final TipoUsuarioRepository tipoUsuarioRepository;
+    private final SimuladorRepository simuladorRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, InstrumentoRepository instrumentoRepository, TipoUsuarioRepository tipoUsuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, InstrumentoRepository instrumentoRepository, TipoUsuarioRepository tipoUsuarioRepository, SimuladorRepository simuladorRepository) {
         this.usuarioRepository = usuarioRepository;
         this.instrumentoRepository = instrumentoRepository;
         this.tipoUsuarioRepository = tipoUsuarioRepository;
+        this.simuladorRepository = simuladorRepository;
     }
 
     @Transactional
@@ -52,7 +56,10 @@ public class UsuarioService {
         usuarioModel.setComplemento(usuarioDto.complemento());
         usuarioModel.setHoras_estudadas(0);
 
-        if(usuarioDto.idInstrumento() != null && !usuarioDto.idInstrumento().equals("")){
+        SimuladorModel simuladorModel = new SimuladorModel();
+        simuladorModel.setUsuarioModel(usuarioModel);
+        usuarioModel.setSimuladorModel(simuladorModel);
+        if (usuarioDto.idInstrumento() != null) {
             InstrumentoModel instrumentoModel = instrumentoRepository.findById(usuarioDto.idInstrumento()).get();
             usuarioModel.setInstrumentoModel(instrumentoModel);
         }
@@ -77,7 +84,7 @@ public class UsuarioService {
         usuarioUpdate.setTelefone(usuarioDto.telefone());
         usuarioUpdate.setComplemento(usuarioDto.complemento());
 
-        if(usuarioDto.idInstrumento() != null && !usuarioDto.idInstrumento().equals("")){
+        if (usuarioDto.idInstrumento() != null){
             InstrumentoModel instrumentoModel = instrumentoRepository.findById(usuarioDto.idInstrumento()).get();
             usuarioUpdate.setInstrumentoModel(instrumentoModel);
         }
@@ -97,6 +104,8 @@ public class UsuarioService {
     @Transactional UsuarioModel updateAssinatura(Long id, Boolean assinatura){
         UsuarioModel usuarioUpdate = usuarioRepository.findById(id).get();
         usuarioUpdate.setAssinatura(assinatura);
+
+        return usuarioRepository.save(usuarioUpdate);
     }
 
     @Transactional

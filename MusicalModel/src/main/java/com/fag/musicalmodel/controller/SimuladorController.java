@@ -22,7 +22,8 @@ public class SimuladorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<SimuladorModel> getSimuladorByIdUsuario(@PathVariable Long id) {
-        simuladorService.getSimuladorByUsuarioModel_IdUsuario(id);
-        return ResponseEntity.status(HttpStatus.OK).body(simuladorService.getSimuladorByUsuarioModel_IdUsuario(id));
+        SimuladorModel simulador = simuladorService.getSimuladorByUsuarioModel_IdUsuario(id);
+
+        return ResponseEntity.ok(simulador);
     }
 }
