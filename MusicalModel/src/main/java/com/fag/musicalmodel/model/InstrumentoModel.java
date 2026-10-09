@@ -29,4 +29,8 @@ public class InstrumentoModel implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "instrumentoModel",fetch = FetchType.LAZY)
     private Set<UsuarioModel> usuarioModel = new HashSet<UsuarioModel>();
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @OneToMany(mappedBy = "instrumentoModel", fetch = FetchType.LAZY)
+    private Set<CursoModel> cursoModel = new HashSet<CursoModel>();
 }

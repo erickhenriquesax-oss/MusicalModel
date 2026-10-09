@@ -63,7 +63,7 @@ public class UsuarioModel implements Serializable {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instrumento")
+    @JoinColumn(name = "-id_instrumento")
     private InstrumentoModel instrumentoModel;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

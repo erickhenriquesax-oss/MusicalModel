@@ -31,8 +31,7 @@ public class InstrumentoService {
 
             return instrumentoRepository.save(instrumento);
         } catch (Exception e){
-            new Exception("Erro");
-            System.out.println("Erro ao salvar instrumento");
+            e.printStackTrace();
             return null;
         }
     }

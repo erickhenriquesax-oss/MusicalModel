@@ -29,8 +29,8 @@ public class CursoModel implements Serializable {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_modalidade")
-    private ModalidadeModel modalidadeModel;
+    @JoinColumn(name = "id_instrumento")
+    private InstrumentoModel instrumentoModel;
 
     @Column(length = 3, nullable = false)
     private int duracao;
