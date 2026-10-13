@@ -53,7 +53,7 @@ public class MatriculaService {
             CursoModel curso = cursoRepository.findById(matriculaDto.idCurso()).get();
             matricula.setCursoModel(curso);
 
-            matricula.setStatus(StatusMatricula.valueOf("ATIVA"));
+            matricula.setStatus(StatusMatricula.ATIVA);
 
             return matriculaRepository.save(matricula);
         } catch (Exception e){
@@ -72,8 +72,8 @@ public class MatriculaService {
     }
 
     @Transactional
-    public MatriculaModel getMatriculaByUsuarioModel_IdUsuario(Long idUsuario){
-        return matriculaRepository.findByUsuarioModel_IdUsuario(idUsuario).orElse(null);
+    public List<MatriculaModel> getMatriculaByUsuarioModel_IdUsuario(Long idUsuario){
+        return matriculaRepository.findByUsuarioModel_IdUsuario(idUsuario);
     }
 
     @Transactional

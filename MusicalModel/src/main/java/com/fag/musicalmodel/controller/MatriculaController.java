@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/musicalmodel/matricula")
 public class MatriculaController {
@@ -19,16 +21,14 @@ public class MatriculaController {
         this.matriculaService = matriculaService;
     }
 
-    @GetMapping("/{id}/usuario")
-    public ResponseEntity<MatriculaModel> getMatriculaByIdUsuario(@PathVariable Long id){
-        MatriculaModel matriculaModel = matriculaService.getMatriculaByUsuarioModel_IdUsuario(id);
-        return ResponseEntity.status(HttpStatus.OK).body(matriculaModel);
+    @GetMapping("/curso/{idCurso}")
+    public ResponseEntity<List<MatriculaModel>> getMatriculasPorCurso(@PathVariable Long idCurso){
+        return ResponseEntity.ok(matriculaService.getMatriculaByIdCurso(idCurso));
     }
 
-    @GetMapping("/{id}/curso")
-    public ResponseEntity<MatriculaModel> getMatriculaByIdCurso(@PathVariable Long id){
-        MatriculaModel matriculaModel = matriculaService.getMatriculaByIdCurso(id).stream().toList().get(0);
-        return ResponseEntity.status(HttpStatus.OK).body(matriculaModel);
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<MatriculaModel>> getMatriculasPorUsuario(@PathVariable Long idUsuario){
+        return ResponseEntity.ok(matriculaService.getMatriculaByIdUsuario(idUsuario));
     }
 
     @PostMapping

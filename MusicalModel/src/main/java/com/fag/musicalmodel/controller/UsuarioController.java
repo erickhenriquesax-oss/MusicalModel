@@ -13,7 +13,7 @@ import java.util.List;
 @RequestMapping("/musicalmodel/usuario")
 public class UsuarioController {
 
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
 
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;

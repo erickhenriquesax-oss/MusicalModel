@@ -22,7 +22,6 @@ public class CursoController {
 
     @GetMapping
     public ResponseEntity<List<CursoModel>> getAllCurso(){
-        cursoService.getAllCursos();
         return ResponseEntity.status(HttpStatus.OK).body(cursoService.getAllCursos());
     }
 
@@ -31,12 +30,12 @@ public class CursoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(cursoService.saveCurso(cursoDto));
     }
 
-    @PutMapping
+    @PutMapping("/{idCurso}")
     public ResponseEntity<CursoModel> updateCurso(@PathVariable Long idCurso, @RequestBody CursoDto cursoDto){
         return ResponseEntity.status(HttpStatus.OK).body(cursoService.updateCurso(idCurso, cursoDto));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{idCurso}")
     public void deleteCurso(@PathVariable Long idCurso){
         cursoService.deleteCurso(idCurso);
     }

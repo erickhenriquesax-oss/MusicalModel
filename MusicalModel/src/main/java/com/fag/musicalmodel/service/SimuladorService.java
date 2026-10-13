@@ -50,4 +50,13 @@ public class SimuladorService {
     public void deleteSimulador(Long id){
         simuladorRepository.deleteById(id);
     }
+
+    @Transactional
+    public SimuladorModel updateVolumeMaster(Long idSimulador, Integer volumeMaster) {
+        SimuladorModel simulador = simuladorRepository.findById(idSimulador)
+                .orElseThrow(() -> new RuntimeException("Simulador não encontrado: " + idSimulador));
+        simulador.setVolume_master(volumeMaster);
+        return simuladorRepository.save(simulador);
+    }
 }
+

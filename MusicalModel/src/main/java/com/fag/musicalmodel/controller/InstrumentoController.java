@@ -4,6 +4,7 @@ package com.fag.musicalmodel.controller;
 import com.fag.musicalmodel.dto.InstrumentoDto;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.service.InstrumentoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

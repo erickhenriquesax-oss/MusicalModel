@@ -21,8 +21,8 @@ public class CanalController {
     }
 
     @GetMapping("/{id}")
-    public List<CanalModel> getCanalsBySimulador(@PathVariable Long id) {
-        return canalService.findCanalByIdSimulador(id);
+    public ResponseEntity<List<CanalModel>> getCanalsBySimulador(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(canalService.findCanalByIdSimulador(id));
     }
 
     @PostMapping

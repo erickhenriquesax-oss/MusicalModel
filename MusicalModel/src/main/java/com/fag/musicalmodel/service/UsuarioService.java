@@ -57,6 +57,7 @@ public class UsuarioService {
         usuarioModel.setHoras_estudadas(0);
 
         SimuladorModel simuladorModel = new SimuladorModel();
+        simuladorModel.setVolume_master(80);
         simuladorModel.setUsuarioModel(usuarioModel);
         usuarioModel.setSimuladorModel(simuladorModel);
         if (usuarioDto.idInstrumento() != null) {
