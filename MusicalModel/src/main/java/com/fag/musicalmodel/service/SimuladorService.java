@@ -26,6 +26,8 @@ public class SimuladorService {
         return simuladorRepository.findByUsuarioModel_IdUsuario(idUsuario).orElse(null);
     }
 
+
+
     @Transactional
     public SimuladorModel saveSimulador(SimuladorDto simuladorDto){
         try {
