@@ -1,4 +1,12 @@
 package com.fag.musicalmodel.dto;
 
-public record MatriculaDto(Long idUsuario, Long idCurso) {
+import jakarta.validation.constraints.NotNull;
+
+public record MatriculaDto(
+        @NotNull(message = "O ID do usuário é obrigatório")
+        Long idUsuario,
+
+        @NotNull(message = "O ID do curso é obrigatório")
+        Long idCurso
+) {
 }

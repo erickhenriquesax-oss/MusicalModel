@@ -4,6 +4,7 @@ package com.fag.musicalmodel.controller;
 import com.fag.musicalmodel.dto.InstrumentoDto;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.service.InstrumentoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class InstrumentoController {
     }
 
     @PostMapping
-    public ResponseEntity<InstrumentoModel> saveIntrumento(@RequestBody InstrumentoDto instrumentoDto){
+    public ResponseEntity<InstrumentoModel> saveIntrumento(@Valid @RequestBody InstrumentoDto instrumentoDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(instrumentoService.saveInstrumento(instrumentoDto));
     }
 

@@ -5,6 +5,7 @@ import com.fag.musicalmodel.dto.MatriculaDto;
 import com.fag.musicalmodel.enums.StatusMatricula;
 import com.fag.musicalmodel.model.MatriculaModel;
 import com.fag.musicalmodel.service.MatriculaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class MatriculaController {
     }
 
     @PostMapping
-    public ResponseEntity<MatriculaModel> saveMatricula(@RequestBody MatriculaDto matriculaDto){
+    public ResponseEntity<MatriculaModel> saveMatricula(@Valid @RequestBody MatriculaDto matriculaDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(matriculaService.saveMatricula(matriculaDto));
     }
 

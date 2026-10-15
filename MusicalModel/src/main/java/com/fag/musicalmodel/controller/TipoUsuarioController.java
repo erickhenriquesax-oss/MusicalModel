@@ -4,6 +4,7 @@ package com.fag.musicalmodel.controller;
 import com.fag.musicalmodel.dto.TipoUsuarioDto;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.service.TipoUsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class TipoUsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<TipoUsuarioModel> saveTipoUsuario(@RequestBody TipoUsuarioDto tipoUsuarioDto){
+    public ResponseEntity<TipoUsuarioModel> saveTipoUsuario(@Valid @RequestBody TipoUsuarioDto tipoUsuarioDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(tipoUsuarioService.saveTipoUsuario(tipoUsuarioDto));
     }
 

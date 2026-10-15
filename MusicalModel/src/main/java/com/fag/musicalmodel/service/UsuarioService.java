@@ -23,7 +23,10 @@ public class UsuarioService {
     private final TipoUsuarioRepository tipoUsuarioRepository;
     private final SimuladorRepository simuladorRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, InstrumentoRepository instrumentoRepository, TipoUsuarioRepository tipoUsuarioRepository, SimuladorRepository simuladorRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          InstrumentoRepository instrumentoRepository,
+                          TipoUsuarioRepository tipoUsuarioRepository,
+                          SimuladorRepository simuladorRepository) {
         this.usuarioRepository = usuarioRepository;
         this.instrumentoRepository = instrumentoRepository;
         this.tipoUsuarioRepository = tipoUsuarioRepository;

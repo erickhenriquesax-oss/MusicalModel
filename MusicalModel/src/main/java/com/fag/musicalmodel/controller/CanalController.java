@@ -4,6 +4,7 @@ package com.fag.musicalmodel.controller;
 import com.fag.musicalmodel.dto.CanalDto;
 import com.fag.musicalmodel.model.CanalModel;
 import com.fag.musicalmodel.service.CanalService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,12 +27,12 @@ public class CanalController {
     }
 
     @PostMapping
-    public ResponseEntity<CanalModel> save(@RequestBody CanalDto canalDto) {
+    public ResponseEntity<CanalModel> save(@Valid @RequestBody CanalDto canalDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(canalService.saveCanal(canalDto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CanalModel> update(@PathVariable Long id,  @RequestBody CanalDto canalDto) {
+    public ResponseEntity<CanalModel> update(@PathVariable Long id, @Valid @RequestBody CanalDto canalDto) {
         return ResponseEntity.status(HttpStatus.OK).body(canalService.updateCanal(id, canalDto));
     }
 }
