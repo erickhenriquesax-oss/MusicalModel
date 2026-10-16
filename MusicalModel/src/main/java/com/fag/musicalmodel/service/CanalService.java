@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.service;
 
 
-import com.fag.musicalmodel.dto.CanalDto;
+import com.fag.musicalmodel.dto.request.CanalDto;
 import com.fag.musicalmodel.model.CanalModel;
 import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.repository.CanalRepository;

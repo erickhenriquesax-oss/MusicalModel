@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.service;
 
 
-import com.fag.musicalmodel.dto.TipoUsuarioDto;
+import com.fag.musicalmodel.dto.request.TipoUsuarioDto;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.repository.TipoUsuarioRepository;
 import jakarta.transaction.Transactional;

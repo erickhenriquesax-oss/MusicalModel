@@ -1,6 +1,6 @@
 package com.fag.musicalmodel.service;
 
-import com.fag.musicalmodel.dto.CursoDto;
+import com.fag.musicalmodel.dto.request.CursoDto;
 import com.fag.musicalmodel.model.CursoModel;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.repository.CursoRepository;

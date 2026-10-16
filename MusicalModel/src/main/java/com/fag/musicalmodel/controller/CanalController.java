@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.CanalDto;
+import com.fag.musicalmodel.dto.request.CanalDto;
 import com.fag.musicalmodel.model.CanalModel;
 import com.fag.musicalmodel.service.CanalService;
 import jakarta.validation.Valid;

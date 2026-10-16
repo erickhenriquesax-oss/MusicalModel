@@ -1,4 +1,4 @@
-package com.fag.musicalmodel.dto;
+package com.fag.musicalmodel.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 

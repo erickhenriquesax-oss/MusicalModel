@@ -1,4 +1,5 @@
 package com.fag.musicalmodel.model;
+import com.fag.musicalmodel.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,4 +25,7 @@ public class TipoUsuarioModel implements Serializable {
     @OneToMany(mappedBy = "tipo_usuario", fetch = FetchType.LAZY)
     private Set<UsuarioModel> usuarioModel = new HashSet<UsuarioModel>();
 
+    public UserRole toUserRole() {
+        return UserRole.fromCodigo(this.idTipoUsuario);
+    }
 }

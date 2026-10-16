@@ -1,6 +1,6 @@
 package com.fag.musicalmodel.service;
 
-import com.fag.musicalmodel.dto.SimuladorDto;
+import com.fag.musicalmodel.dto.request.SimuladorDto;
 import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.model.UsuarioModel;
 import com.fag.musicalmodel.repository.SimuladorRepository;

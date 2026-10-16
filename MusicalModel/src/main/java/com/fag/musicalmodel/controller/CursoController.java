@@ -1,12 +1,13 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.CursoDto;
+import com.fag.musicalmodel.dto.request.CursoDto;
 import com.fag.musicalmodel.model.CursoModel;
 import com.fag.musicalmodel.service.CursoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,17 +26,17 @@ public class CursoController {
     public ResponseEntity<List<CursoModel>> getAllCurso(){
         return ResponseEntity.status(HttpStatus.OK).body(cursoService.getAllCursos());
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CursoModel> addCurso(@Valid @RequestBody CursoDto cursoDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(cursoService.saveCurso(cursoDto));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{idCurso}")
     public ResponseEntity<CursoModel> updateCurso(@PathVariable Long idCurso, @Valid @RequestBody CursoDto cursoDto){
         return ResponseEntity.status(HttpStatus.OK).body(cursoService.updateCurso(idCurso, cursoDto));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{idCurso}")
     public void deleteCurso(@PathVariable Long idCurso){
         cursoService.deleteCurso(idCurso);

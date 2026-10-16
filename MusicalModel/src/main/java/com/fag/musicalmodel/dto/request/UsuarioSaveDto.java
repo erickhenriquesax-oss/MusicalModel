@@ -1,12 +1,10 @@
-package com.fag.musicalmodel.dto;
+package com.fag.musicalmodel.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record UsuarioDto(
-        @NotNull(message = "O tipo de usuário é obrigatório")
+public record UsuarioSaveDto(
         Long idTipoUsuario,
 
         @NotBlank(message = "A senha é obrigatória")
@@ -29,5 +27,6 @@ public record UsuarioDto(
         @NotBlank(message = "O nome é obrigatório")
         String nome,
 
-        Long numero) {
+        Long numero
+) {
 }

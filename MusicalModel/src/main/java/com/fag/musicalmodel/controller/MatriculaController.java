@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.MatriculaDto;
+import com.fag.musicalmodel.dto.request.MatriculaDto;
 import com.fag.musicalmodel.enums.StatusMatricula;
 import com.fag.musicalmodel.model.MatriculaModel;
 import com.fag.musicalmodel.service.MatriculaService;

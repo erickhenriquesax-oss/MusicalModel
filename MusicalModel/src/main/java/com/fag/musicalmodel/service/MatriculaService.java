@@ -1,6 +1,6 @@
 package com.fag.musicalmodel.service;
 
-import com.fag.musicalmodel.dto.MatriculaDto;
+import com.fag.musicalmodel.dto.request.MatriculaDto;
 import com.fag.musicalmodel.enums.StatusMatricula;
 import com.fag.musicalmodel.model.CursoModel;
 import com.fag.musicalmodel.model.MatriculaModel;

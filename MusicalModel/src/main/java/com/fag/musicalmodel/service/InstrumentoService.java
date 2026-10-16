@@ -1,6 +1,6 @@
 package com.fag.musicalmodel.service;
 
-import com.fag.musicalmodel.dto.InstrumentoDto;
+import com.fag.musicalmodel.dto.request.InstrumentoDto;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.repository.InstrumentoRepository;
 import jakarta.transaction.Transactional;

@@ -1,12 +1,13 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.TipoUsuarioDto;
+import com.fag.musicalmodel.dto.request.TipoUsuarioDto;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.service.TipoUsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,17 +21,17 @@ public class TipoUsuarioController {
     public TipoUsuarioController(TipoUsuarioService tipoUsuarioService) {
         this.tipoUsuarioService = tipoUsuarioService;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<TipoUsuarioModel>> getAllTipoUsuario(){
         return ResponseEntity.status(HttpStatus.OK).body(tipoUsuarioService.getAllTipoUsuario());
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<TipoUsuarioModel> saveTipoUsuario(@Valid @RequestBody TipoUsuarioDto tipoUsuarioDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(tipoUsuarioService.saveTipoUsuario(tipoUsuarioDto));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTipoUsuario(@PathVariable Long id){
         tipoUsuarioService.deleteTipoUsuario(id);

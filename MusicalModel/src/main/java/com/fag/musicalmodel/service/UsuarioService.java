@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.service;
 
-
-import com.fag.musicalmodel.dto.UsuarioDto;
+import com.fag.musicalmodel.dto.request.UsuarioSaveDto;
+import com.fag.musicalmodel.enums.StatusMatricula;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
@@ -11,6 +11,8 @@ import com.fag.musicalmodel.repository.SimuladorRepository;
 import com.fag.musicalmodel.repository.TipoUsuarioRepository;
 import com.fag.musicalmodel.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,8 @@ public class UsuarioService {
     private final InstrumentoRepository instrumentoRepository;
     private final TipoUsuarioRepository tipoUsuarioRepository;
     private final SimuladorRepository simuladorRepository;
+    @Autowired
+    private PasswordEncoder encoder;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           InstrumentoRepository instrumentoRepository,
@@ -44,55 +48,53 @@ public class UsuarioService {
     }
 
     @Transactional
-    public UsuarioModel saveUsuario(UsuarioDto usuarioDto) {
+    public UsuarioModel saveUsuario(UsuarioSaveDto usuarioSaveDto) {
         UsuarioModel usuarioModel = new UsuarioModel();
-        usuarioModel.setNome(usuarioDto.nome());
-        usuarioModel.setEmail(usuarioDto.email());
-        usuarioModel.setSenha(usuarioDto.senha());
-        usuarioModel.setCpf(usuarioDto.cpf());
+        usuarioModel.setNome(usuarioSaveDto.nome());
+        usuarioModel.setEmail(usuarioSaveDto.email());
+        usuarioModel.setSenha(encoder.encode(usuarioSaveDto.senha()));
+        usuarioModel.setCpf(usuarioSaveDto.cpf());
         usuarioModel.setAtivo(true);
-        usuarioModel.setCep(usuarioDto.cep());
-        usuarioModel.setEndereco(usuarioDto.endereco());
-        usuarioModel.setNumero(usuarioDto.numero());
-        usuarioModel.setTelefone(usuarioDto.telefone());
+        usuarioModel.setCep(usuarioSaveDto.cep());
+        usuarioModel.setEndereco(usuarioSaveDto.endereco());
+        usuarioModel.setNumero(usuarioSaveDto.numero());
+        usuarioModel.setTelefone(usuarioSaveDto.telefone());
         usuarioModel.setAssinatura(false);
-        usuarioModel.setComplemento(usuarioDto.complemento());
+        usuarioModel.setComplemento(usuarioSaveDto.complemento());
         usuarioModel.setHoras_estudadas(0);
 
         SimuladorModel simuladorModel = new SimuladorModel();
         simuladorModel.setVolume_master(80);
         simuladorModel.setUsuarioModel(usuarioModel);
         usuarioModel.setSimuladorModel(simuladorModel);
-        if (usuarioDto.idInstrumento() != null) {
-            InstrumentoModel instrumentoModel = instrumentoRepository.findById(usuarioDto.idInstrumento()).get();
+        if (usuarioSaveDto.idInstrumento() != null) {
+            InstrumentoModel instrumentoModel = instrumentoRepository.findById(usuarioSaveDto.idInstrumento()).get();
             usuarioModel.setInstrumentoModel(instrumentoModel);
         }
-        TipoUsuarioModel tipoUsuarioModel = tipoUsuarioRepository.findById(usuarioDto.idTipoUsuario()).get();
+        TipoUsuarioModel tipoUsuarioModel = tipoUsuarioRepository.findById(usuarioSaveDto.idTipoUsuario()).get();
         usuarioModel.setTipo_usuario(tipoUsuarioModel);
 
         return usuarioRepository.save(usuarioModel);
     }
 
-
     @Transactional
-    public UsuarioModel updateUsuario(Long id, UsuarioDto usuarioDto) {
-
+    public UsuarioModel updateUsuario(Long id, UsuarioSaveDto usuarioSaveDto) {
         UsuarioModel usuarioUpdate = usuarioRepository.findById(id).get();
-        usuarioUpdate.setNome(usuarioDto.nome());
-        usuarioUpdate.setEmail(usuarioDto.email());
-        usuarioUpdate.setSenha(usuarioDto.senha());
-        usuarioUpdate.setCpf(usuarioDto.cpf());
-        usuarioUpdate.setCep(usuarioDto.cep());
-        usuarioUpdate.setEndereco(usuarioDto.endereco());
-        usuarioUpdate.setNumero(usuarioDto.numero());
-        usuarioUpdate.setTelefone(usuarioDto.telefone());
-        usuarioUpdate.setComplemento(usuarioDto.complemento());
+        usuarioUpdate.setNome(usuarioSaveDto.nome());
+        usuarioUpdate.setEmail(usuarioSaveDto.email());
+        usuarioUpdate.setSenha(encoder.encode(usuarioSaveDto.senha()));
+        usuarioUpdate.setCpf(usuarioSaveDto.cpf());
+        usuarioUpdate.setCep(usuarioSaveDto.cep());
+        usuarioUpdate.setEndereco(usuarioSaveDto.endereco());
+        usuarioUpdate.setNumero(usuarioSaveDto.numero());
+        usuarioUpdate.setTelefone(usuarioSaveDto.telefone());
+        usuarioUpdate.setComplemento(usuarioSaveDto.complemento());
 
-        if (usuarioDto.idInstrumento() != null){
-            InstrumentoModel instrumentoModel = instrumentoRepository.findById(usuarioDto.idInstrumento()).get();
+        if (usuarioSaveDto.idInstrumento() != null) {
+            InstrumentoModel instrumentoModel = instrumentoRepository.findById(usuarioSaveDto.idInstrumento()).get();
             usuarioUpdate.setInstrumentoModel(instrumentoModel);
         }
-        TipoUsuarioModel tipoUsuarioModel = tipoUsuarioRepository.findById(usuarioDto.idTipoUsuario()).get();
+        TipoUsuarioModel tipoUsuarioModel = tipoUsuarioRepository.findById(usuarioSaveDto.idTipoUsuario()).get();
         usuarioUpdate.setTipo_usuario(tipoUsuarioModel);
 
         return usuarioRepository.save(usuarioUpdate);
@@ -100,16 +102,15 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioModel updateAtivo(Long id, Boolean ativo) {
-        UsuarioModel usuarioUpdate = usuarioRepository.findById(id).get();
-        usuarioUpdate.setAtivo(ativo);
-        return usuarioRepository.save(usuarioUpdate);
+        UsuarioModel usuarioModel = usuarioRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
+        usuarioModel.setAtivo(ativo);
+        return usuarioRepository.save(usuarioModel);
     }
-
-    @Transactional UsuarioModel updateAssinatura(Long id, Boolean assinatura){
-        UsuarioModel usuarioUpdate = usuarioRepository.findById(id).get();
-        usuarioUpdate.setAssinatura(assinatura);
-
-        return usuarioRepository.save(usuarioUpdate);
+    @Transactional
+    public UsuarioModel updateAssinatura(Long id, Boolean assinatura) {
+        UsuarioModel usuarioModel = usuarioRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
+        usuarioModel.setAssinatura(assinatura);
+        return usuarioRepository.save(usuarioModel);
     }
 
     @Transactional
@@ -117,5 +118,3 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 }
-
-
