@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.service;
 
 
-import com.fag.musicalmodel.dto.request.CanalDto;
+import com.fag.musicalmodel.dto.request.CanalRequestDto;
 import com.fag.musicalmodel.model.CanalModel;
 import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.repository.CanalRepository;
@@ -23,16 +23,16 @@ public class CanalService {
     }
 
     @Transactional
-    public CanalModel saveCanal(CanalDto canalDto) {
+    public CanalModel saveCanal(CanalRequestDto canalRequestDto) {
         CanalModel canalModel = new CanalModel();
         canalModel.setAgudo(50);
         canalModel.setMedio(50);
         canalModel.setGrave(50);
         canalModel.setVolume(50);
 
-        if (canalDto.idSimulador() != null) {
-            SimuladorModel simulador = simuladorRepository.findById(canalDto.idSimulador())
-                    .orElseThrow(() -> new RuntimeException("Simulador não encontrado: " + canalDto.idSimulador()));
+        if (canalRequestDto.idSimulador() != null) {
+            SimuladorModel simulador = simuladorRepository.findById(canalRequestDto.idSimulador())
+                    .orElseThrow(() -> new RuntimeException("Simulador não encontrado: " + canalRequestDto.idSimulador()));
             canalModel.setSimuladorModel(simulador);
         }
 
@@ -40,12 +40,12 @@ public class CanalService {
     }
 
     @Transactional
-    public CanalModel updateCanal(Long id, CanalDto canalDto) {
+    public CanalModel updateCanal(Long id, CanalRequestDto canalRequestDto) {
         CanalModel canalModel = canalRepository.findCanalModelByIdCanal(id);
-        canalModel.setGrave(canalDto.grave());
-        canalModel.setMedio(canalDto.medio());
-        canalModel.setAgudo(canalDto.agudo());
-        canalModel.setVolume(canalDto.volume());
+        canalModel.setGrave(canalRequestDto.grave());
+        canalModel.setMedio(canalRequestDto.medio());
+        canalModel.setAgudo(canalRequestDto.agudo());
+        canalModel.setVolume(canalRequestDto.volume());
         return canalRepository.save(canalModel);
     }
 

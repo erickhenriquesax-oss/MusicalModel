@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.request.TipoUsuarioDto;
+import com.fag.musicalmodel.dto.request.TipoUsuarioRequestDto;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.service.TipoUsuarioService;
 import jakarta.validation.Valid;
@@ -26,11 +26,13 @@ public class TipoUsuarioController {
     public ResponseEntity<List<TipoUsuarioModel>> getAllTipoUsuario(){
         return ResponseEntity.status(HttpStatus.OK).body(tipoUsuarioService.getAllTipoUsuario());
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<TipoUsuarioModel> saveTipoUsuario(@Valid @RequestBody TipoUsuarioDto tipoUsuarioDto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(tipoUsuarioService.saveTipoUsuario(tipoUsuarioDto));
+    public ResponseEntity<TipoUsuarioModel> saveTipoUsuario(@Valid @RequestBody TipoUsuarioRequestDto tipoUsuarioRequestDto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(tipoUsuarioService.saveTipoUsuario(tipoUsuarioRequestDto));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTipoUsuario(@PathVariable Long id){

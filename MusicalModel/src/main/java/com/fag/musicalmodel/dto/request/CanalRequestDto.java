@@ -2,7 +2,7 @@ package com.fag.musicalmodel.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 
-public record CanalDto(
+public record CanalRequestDto(
         @NotNull(message = "O ID do simulador é obrigatório")
         Long idSimulador,
 

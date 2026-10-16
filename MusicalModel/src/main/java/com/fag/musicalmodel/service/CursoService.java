@@ -1,11 +1,13 @@
 package com.fag.musicalmodel.service;
 
-import com.fag.musicalmodel.dto.request.CursoDto;
+import com.fag.musicalmodel.dto.request.CursoRequestDto;
 import com.fag.musicalmodel.model.CursoModel;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.repository.CursoRepository;
 import com.fag.musicalmodel.repository.InstrumentoRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,23 +23,25 @@ public class CursoService {
         this.instrumentoRepository = instrumentoRepository;
     }
 
+    @Cacheable(value = "cursos")
     @Transactional
     public List<CursoModel> getAllCursos(){
         return cursoRepository.findAll();
     }
 
+    @CacheEvict(value = "cursos", allEntries = true)
     @Transactional
-    public CursoModel saveCurso(CursoDto cursoDto){
+    public CursoModel saveCurso(CursoRequestDto cursoRequestDto){
         try {
             CursoModel curso = new CursoModel();
-            curso.setTitulo(cursoDto.titulo());
-            curso.setDescricao(cursoDto.descricao());
-            curso.setDuracao(cursoDto.duracao());
-            curso.setConteudo(cursoDto.conteudo());
+            curso.setTitulo(cursoRequestDto.titulo());
+            curso.setDescricao(cursoRequestDto.descricao());
+            curso.setDuracao(cursoRequestDto.duracao());
+            curso.setConteudo(cursoRequestDto.conteudo());
             curso.setAtivo(true);
 
-            if(cursoDto.idInstrumento() != null){
-                InstrumentoModel instrumento = instrumentoRepository.findById(cursoDto.idInstrumento()).get();
+            if(cursoRequestDto.idInstrumento() != null){
+                InstrumentoModel instrumento = instrumentoRepository.findById(cursoRequestDto.idInstrumento()).get();
                 curso.setInstrumentoModel(instrumento);
             }
 
@@ -48,15 +52,16 @@ public class CursoService {
         }
     }
 
+    @CacheEvict(value = "cursos", allEntries = true)
     @Transactional
-    public CursoModel updateCurso(Long id,CursoDto cursoDto){
+    public CursoModel updateCurso(Long id, CursoRequestDto cursoRequestDto){
         try{
             CursoModel cursoUpdate = cursoRepository.findById(id).get();
-            cursoUpdate.setTitulo(cursoDto.titulo());
-            cursoUpdate.setDescricao(cursoDto.descricao());
-            cursoUpdate.setDuracao(cursoDto.duracao());
-            cursoUpdate.setConteudo(cursoDto.conteudo());
-            cursoUpdate.setInstrumentoModel(instrumentoRepository.findById(cursoDto.idInstrumento()).get());
+            cursoUpdate.setTitulo(cursoRequestDto.titulo());
+            cursoUpdate.setDescricao(cursoRequestDto.descricao());
+            cursoUpdate.setDuracao(cursoRequestDto.duracao());
+            cursoUpdate.setConteudo(cursoRequestDto.conteudo());
+            cursoUpdate.setInstrumentoModel(instrumentoRepository.findById(cursoRequestDto.idInstrumento()).get());
             return cursoRepository.save(cursoUpdate);
         } catch (Exception e){
             e.printStackTrace();
@@ -64,6 +69,7 @@ public class CursoService {
         }
     }
 
+    @CacheEvict(value = "cursos", allEntries = true)
     @Transactional
     public void deleteCurso(Long id){
         cursoRepository.deleteById(id);

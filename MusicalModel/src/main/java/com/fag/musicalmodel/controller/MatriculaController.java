@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.request.MatriculaDto;
+import com.fag.musicalmodel.dto.request.MatriculaRequestDto;
 import com.fag.musicalmodel.enums.StatusMatricula;
 import com.fag.musicalmodel.model.MatriculaModel;
 import com.fag.musicalmodel.service.MatriculaService;
@@ -22,6 +22,11 @@ public class MatriculaController {
         this.matriculaService = matriculaService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<MatriculaModel>> getAllMatriculas() {
+        return new ResponseEntity<>(matriculaService.getAllMatriculas(), HttpStatus.OK);
+    }
+
     @GetMapping("/curso/{idCurso}")
     public ResponseEntity<List<MatriculaModel>> getMatriculasPorCurso(@PathVariable Long idCurso){
         return ResponseEntity.ok(matriculaService.getMatriculaByIdCurso(idCurso));
@@ -33,8 +38,8 @@ public class MatriculaController {
     }
 
     @PostMapping
-    public ResponseEntity<MatriculaModel> saveMatricula(@Valid @RequestBody MatriculaDto matriculaDto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(matriculaService.saveMatricula(matriculaDto));
+    public ResponseEntity<MatriculaModel> saveMatricula(@Valid @RequestBody MatriculaRequestDto matriculaRequestDto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(matriculaService.saveMatricula(matriculaRequestDto));
     }
 
     @PatchMapping("/{id}/status")

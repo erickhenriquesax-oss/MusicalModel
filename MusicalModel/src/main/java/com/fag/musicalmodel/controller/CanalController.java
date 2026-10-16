@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.request.CanalDto;
+import com.fag.musicalmodel.dto.request.CanalRequestDto;
 import com.fag.musicalmodel.model.CanalModel;
 import com.fag.musicalmodel.service.CanalService;
 import jakarta.validation.Valid;
@@ -27,12 +27,12 @@ public class CanalController {
     }
 
     @PostMapping
-    public ResponseEntity<CanalModel> save(@Valid @RequestBody CanalDto canalDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(canalService.saveCanal(canalDto));
+    public ResponseEntity<CanalModel> save(@Valid @RequestBody CanalRequestDto canalRequestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(canalService.saveCanal(canalRequestDto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CanalModel> update(@PathVariable Long id, @Valid @RequestBody CanalDto canalDto) {
-        return ResponseEntity.status(HttpStatus.OK).body(canalService.updateCanal(id, canalDto));
+    public ResponseEntity<CanalModel> update(@PathVariable Long id, @Valid @RequestBody CanalRequestDto canalRequestDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(canalService.updateCanal(id, canalRequestDto));
     }
 }

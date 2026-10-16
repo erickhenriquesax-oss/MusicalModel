@@ -1,7 +1,7 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.request.CursoDto;
+import com.fag.musicalmodel.dto.request.CursoRequestDto;
 import com.fag.musicalmodel.model.CursoModel;
 import com.fag.musicalmodel.service.CursoService;
 import jakarta.validation.Valid;
@@ -28,13 +28,13 @@ public class CursoController {
     }
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<CursoModel> addCurso(@Valid @RequestBody CursoDto cursoDto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(cursoService.saveCurso(cursoDto));
+    public ResponseEntity<CursoModel> addCurso(@Valid @RequestBody CursoRequestDto cursoRequestDto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(cursoService.saveCurso(cursoRequestDto));
     }
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{idCurso}")
-    public ResponseEntity<CursoModel> updateCurso(@PathVariable Long idCurso, @Valid @RequestBody CursoDto cursoDto){
-        return ResponseEntity.status(HttpStatus.OK).body(cursoService.updateCurso(idCurso, cursoDto));
+    public ResponseEntity<CursoModel> updateCurso(@PathVariable Long idCurso, @Valid @RequestBody CursoRequestDto cursoRequestDto){
+        return ResponseEntity.status(HttpStatus.OK).body(cursoService.updateCurso(idCurso, cursoRequestDto));
     }
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{idCurso}")

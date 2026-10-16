@@ -2,7 +2,7 @@ package com.fag.musicalmodel.controller;
 
 import com.fag.musicalmodel.config.TokenConfig;
 import com.fag.musicalmodel.dto.request.LoginDto;
-import com.fag.musicalmodel.dto.request.UsuarioSaveDto;
+import com.fag.musicalmodel.dto.request.UsuarioRequestDto;
 import com.fag.musicalmodel.dto.response.LoginResponse;
 import com.fag.musicalmodel.dto.response.UsuarioResponseDto;
 import com.fag.musicalmodel.model.UsuarioModel;
@@ -10,6 +10,7 @@ import com.fag.musicalmodel.repository.UsuarioRepository;
 import com.fag.musicalmodel.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -70,14 +71,14 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDto> saveUsuario(@Valid @RequestBody UsuarioSaveDto usuarioSaveDto) {
-        UsuarioModel usuarioSalvo = usuarioService.saveUsuario(usuarioSaveDto);
+    public ResponseEntity<UsuarioResponseDto> saveUsuario(@Valid @RequestBody UsuarioRequestDto usuarioRequestDto) {
+        UsuarioModel usuarioSalvo = usuarioService.saveUsuario(usuarioRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new UsuarioResponseDto(usuarioSalvo));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDto> updateUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioSaveDto usuarioSaveDto) {
-        UsuarioModel usuarioAtualizado = usuarioService.updateUsuario(id, usuarioSaveDto);
+    public ResponseEntity<UsuarioResponseDto> updateUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioRequestDto usuarioRequestDto) {
+        UsuarioModel usuarioAtualizado = usuarioService.updateUsuario(id, usuarioRequestDto);
         return ResponseEntity.ok(new UsuarioResponseDto(usuarioAtualizado));
     }
 
@@ -102,6 +103,7 @@ public class UsuarioController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
+
     public ResponseEntity<Void> deleteById(@PathVariable Long id){
         usuarioService.deleteById(id);
         return ResponseEntity.ok().build();

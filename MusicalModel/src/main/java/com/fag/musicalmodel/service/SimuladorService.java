@@ -1,14 +1,12 @@
 package com.fag.musicalmodel.service;
 
-import com.fag.musicalmodel.dto.request.SimuladorDto;
+import com.fag.musicalmodel.dto.request.SimuladorRequestDto;
 import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.model.UsuarioModel;
 import com.fag.musicalmodel.repository.SimuladorRepository;
 import com.fag.musicalmodel.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class SimuladorService {
@@ -26,10 +24,8 @@ public class SimuladorService {
         return simuladorRepository.findByUsuarioModel_IdUsuario(idUsuario).orElse(null);
     }
 
-
-
     @Transactional
-    public SimuladorModel saveSimulador(SimuladorDto simuladorDto){
+    public SimuladorModel saveSimulador(SimuladorRequestDto simuladorDto){
         try {
             SimuladorModel simulador = new SimuladorModel();
             simulador.setVolume_master(simuladorDto.volume_master());

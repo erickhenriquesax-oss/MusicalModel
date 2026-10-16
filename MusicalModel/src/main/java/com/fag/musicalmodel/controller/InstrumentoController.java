@@ -1,11 +1,11 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.request.InstrumentoDto;
+import com.fag.musicalmodel.dto.request.InstrumentoRequestDto;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.service.InstrumentoService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,11 +27,13 @@ public class InstrumentoController {
     public ResponseEntity<List<InstrumentoModel>> getAllInstrumentos(){
         return ResponseEntity.status(HttpStatus.OK).body(instrumentoService.getAllInstrumentos());
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<InstrumentoModel> saveIntrumento(@Valid @RequestBody InstrumentoDto instrumentoDto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(instrumentoService.saveInstrumento(instrumentoDto));
+    public ResponseEntity<InstrumentoModel> saveIntrumento(@Valid @RequestBody InstrumentoRequestDto instrumentoRequestDto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(instrumentoService.saveInstrumento(instrumentoRequestDto));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteInstrumento(@PathVariable Long id){

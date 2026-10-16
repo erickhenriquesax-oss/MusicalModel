@@ -2,7 +2,7 @@ package com.fag.musicalmodel.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 
-public record MatriculaDto(
+public record MatriculaRequestDto(
         @NotNull(message = "O ID do usuário é obrigatório")
         Long idUsuario,
 

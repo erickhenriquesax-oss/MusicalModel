@@ -1,6 +1,6 @@
 package com.fag.musicalmodel.dto.request;
 
-public record SimuladorDto(
+public record SimuladorRequestDto(
         Long id_usuario,
         Integer volume_master
 ) {
