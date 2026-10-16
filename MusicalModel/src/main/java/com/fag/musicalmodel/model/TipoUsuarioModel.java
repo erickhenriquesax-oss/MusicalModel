@@ -2,6 +2,7 @@ package com.fag.musicalmodel.model;
 import com.fag.musicalmodel.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +16,7 @@ import java.util.Set;
 public class TipoUsuarioModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Setter(AccessLevel.NONE)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTipoUsuario;
 

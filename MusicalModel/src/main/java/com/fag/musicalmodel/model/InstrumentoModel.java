@@ -3,6 +3,8 @@ package com.fag.musicalmodel.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,10 +14,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tb_instrumento")
-@Setter @Getter
+@Getter @Setter
 public class InstrumentoModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idInstrumento;
