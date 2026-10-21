@@ -1,11 +1,11 @@
-# 🎵 MusicalModel — Plataforma de Ensino Musical & Simulador de Áudio Interativo
+# MusicalModel — Plataforma de Ensino Musical e Simulador de Áudio Interativo
 
 > **Trabalho de Conclusão de Curso (TCC)**  
 > **Backend:** Java 25 | Spring Boot | Spring Data JPA | Spring Web | Spring Security   
 
 ---
 
-## 📌 1. Objetivo do Projeto
+##  1. Objetivo do Projeto
 
 O **MusicalModel** é uma plataforma educacional e interativa voltada para o aprendizado prático de música e produção de áudio. O projeto une a gestão pedagógica de alunos, cursos e instrumentos à experiência prática de um **Simulador de Mesa de Som (Mixer de Áudio)** diretamente no navegador e em aplicativo desktop.
 
@@ -16,7 +16,7 @@ O **MusicalModel** é uma plataforma educacional e interativa voltada para o apr
 
 ---
 
-## 🎛️ 2. A Mesa de Som Virtual & APIs do Navegador (Web Audio API)
+## 2. A Mesa de Som Virtual & APIs do Navegador (Web Audio API)
 
 Um dos maiores diferenciais técnicos do projeto é a integração entre o backend e a interface visual de simulação de áudio desenhada
 
@@ -43,7 +43,7 @@ flowchart LR
    - Um nó mestre (`GainNode`) que soma todos os canais e aplica o `volume_master` antes de enviar o sinal para os alto-falantes (`audioContext.destination`).
 ---
 
-## 🚀 3. Tecnologias Utilizadas no Backend
+##  3. Tecnologias Utilizadas no Backend
 
 O backend foi construído utilizando as versões e padrões mais recentes da engenharia de software Java:
 
@@ -60,7 +60,7 @@ O backend foi construído utilizando as versões e padrões mais recentes da eng
 
 ---
 
-## 🔐 4. Arquitetura de Segurança & Controle de Acesso (RBAC)
+##  4. Arquitetura de Segurança & Controle de Acesso (RBAC)
 
 O sistema adota autenticação **Stateless** com JWT e controle de permissões baseado em papéis (**Role-Based Access Control**):
 
@@ -78,7 +78,7 @@ O sistema adota autenticação **Stateless** com JWT e controle de permissões b
 
 ---
 
-## ⚡ 5. Alta Performance: Virtual Threads & Cache
+## 5. Alta Performance: Virtual Threads & Cache
 
 ### Java Virtual Threads (Project Loom)
 Configurado diretamente no `application.properties`:
@@ -99,7 +99,7 @@ A camada de cache foi desacoplada na regra de negócio (**Services**):
 
 ---
 
-## 📁 6. Estrutura de Pastas do Projeto
+##  6. Estrutura de Pastas do Projeto
 
 O código-fonte segue a arquitetura em camadas limpa e separada por responsabilidades:
 
@@ -154,7 +154,7 @@ src/main/java/com/fag/musicalmodel/
 
 ---
 
-## 📡 7. Principais Endpoints da API
+## 7. Principais Endpoints da API
 
 | Método | Endpoint | Permissão | Descrição |
 | :--- | :--- | :--- | :--- |
@@ -174,7 +174,7 @@ src/main/java/com/fag/musicalmodel/
 
 ---
 
-## ⚙️ 8. Como Executar o Projeto
+##  8. Como Executar o Projeto
 
 ### Pré-requisitos:
 - **Java 21 ou superior** (Recomendado: **Java 25**) instalado e configurado no `JAVA_HOME`.
@@ -208,6 +208,6 @@ A API estará disponível em: `http://localhost:8080/musicalmodel`
 
 ---
 
-## 🎓 9. Contexto Acadêmico
+## 9. Contexto Acadêmico
 
-Este projeto compõe o Trabalho de Conclusão de Curso (TCC) na área de Engenharia de Software, demonstrando a aplicação prática de engenharia de software de ponta, computação musical interativa na web, arquitetura modular em camadas e segurança defensiva.
+Este projeto compõe o Trabalho de Conclusão de Curso (TCC) de Engenharia de Software, demonstrando a aplicação prática de engenharia de software, computação musical interativa na web, arquitetura e mais
