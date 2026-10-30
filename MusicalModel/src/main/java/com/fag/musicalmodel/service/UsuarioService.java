@@ -11,8 +11,6 @@ import com.fag.musicalmodel.repository.TipoUsuarioRepository;
 import com.fag.musicalmodel.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +37,6 @@ public class UsuarioService {
     }
 
 
-    @Cacheable("usuarios")
     @Transactional
     public List<UsuarioModel> findAll() {
         return usuarioRepository.findAll();
@@ -51,7 +48,6 @@ public class UsuarioService {
     }
 
 
-    @CacheEvict(value = "usuarios", allEntries = true)
     @Transactional
     public UsuarioModel saveUsuario(UsuarioRequestDto usuarioRequestDto) {
         UsuarioModel usuarioModel = new UsuarioModel();
@@ -82,7 +78,6 @@ public class UsuarioService {
         return usuarioRepository.save(usuarioModel);
     }
 
-    @CacheEvict(value = "usuarios", allEntries = true)
     @Transactional
     public UsuarioModel updateUsuario(Long id, UsuarioRequestDto usuarioRequestDto) {
         UsuarioModel usuarioUpdate = usuarioRepository.findById(id).get();
@@ -106,7 +101,6 @@ public class UsuarioService {
         return usuarioRepository.save(usuarioUpdate);
     }
 
-    @CacheEvict(value = "usuarios", allEntries = true)
     @Transactional
     public UsuarioModel updateAtivo(Long id, Boolean ativo) {
         UsuarioModel usuarioModel = usuarioRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
@@ -114,7 +108,6 @@ public class UsuarioService {
         return usuarioRepository.save(usuarioModel);
     }
 
-    @CacheEvict(value = "usuarios", allEntries = true)
     @Transactional
     public UsuarioModel updateAssinatura(Long id, Boolean assinatura) {
         UsuarioModel usuarioModel = usuarioRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
@@ -122,7 +115,6 @@ public class UsuarioService {
         return usuarioRepository.save(usuarioModel);
     }
 
-    @CacheEvict(value = "usuarios", allEntries = true)
     @Transactional
     public void deleteById(Long id) {
         usuarioRepository.deleteById(id);
