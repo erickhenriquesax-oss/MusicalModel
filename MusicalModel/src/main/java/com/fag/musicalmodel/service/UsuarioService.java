@@ -1,6 +1,7 @@
 package com.fag.musicalmodel.service;
 
 import com.fag.musicalmodel.dto.request.UsuarioRequestDto;
+import com.fag.musicalmodel.exception.ResourceNotFoundException;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
@@ -11,6 +12,7 @@ import com.fag.musicalmodel.repository.TipoUsuarioRepository;
 import com.fag.musicalmodel.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +46,7 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioModel findById(Long id) {
-        return usuarioRepository.findById(id).get();
+        return buscarUsuario(id);
     }
 
 
@@ -67,20 +69,21 @@ public class UsuarioService {
         SimuladorModel simuladorModel = new SimuladorModel();
         simuladorModel.setVolume_master(80);
         simuladorModel.setUsuarioModel(usuarioModel);
+        simuladorModel.criarCanaisPadrao(); // 8 canais com todos os valores em 50
         usuarioModel.setSimuladorModel(simuladorModel);
         if (usuarioRequestDto.idInstrumento() != null) {
-            InstrumentoModel instrumentoModel = instrumentoRepository.findById(usuarioRequestDto.idInstrumento()).get();
-            usuarioModel.setInstrumentoModel(instrumentoModel);
+            usuarioModel.setInstrumentoModel(buscarInstrumento(usuarioRequestDto.idInstrumento()));
         }
-        TipoUsuarioModel tipoUsuarioModel = tipoUsuarioRepository.findById(usuarioRequestDto.idTipoUsuario()).get();
-        usuarioModel.setTipo_usuario(tipoUsuarioModel);
+        usuarioModel.setTipo_usuario(buscarTipoUsuario(usuarioRequestDto.idTipoUsuario()));
 
         return usuarioRepository.save(usuarioModel);
     }
 
+    // A listagem de matrículas em cache guarda o nome do usuário: precisa ser limpa quando ele muda.
+    @CacheEvict(value = "matriculas", allEntries = true)
     @Transactional
     public UsuarioModel updateUsuario(Long id, UsuarioRequestDto usuarioRequestDto) {
-        UsuarioModel usuarioUpdate = usuarioRepository.findById(id).get();
+        UsuarioModel usuarioUpdate = buscarUsuario(id);
         usuarioUpdate.setNome(usuarioRequestDto.nome());
         usuarioUpdate.setEmail(usuarioRequestDto.email());
         usuarioUpdate.setSenha(encoder.encode(usuarioRequestDto.senha()));
@@ -92,31 +95,49 @@ public class UsuarioService {
         usuarioUpdate.setComplemento(usuarioRequestDto.complemento());
 
         if (usuarioRequestDto.idInstrumento() != null) {
-            InstrumentoModel instrumentoModel = instrumentoRepository.findById(usuarioRequestDto.idInstrumento()).get();
-            usuarioUpdate.setInstrumentoModel(instrumentoModel);
+            usuarioUpdate.setInstrumentoModel(buscarInstrumento(usuarioRequestDto.idInstrumento()));
         }
-        TipoUsuarioModel tipoUsuarioModel = tipoUsuarioRepository.findById(usuarioRequestDto.idTipoUsuario()).get();
-        usuarioUpdate.setTipo_usuario(tipoUsuarioModel);
+        usuarioUpdate.setTipo_usuario(buscarTipoUsuario(usuarioRequestDto.idTipoUsuario()));
 
         return usuarioRepository.save(usuarioUpdate);
     }
 
     @Transactional
     public UsuarioModel updateAtivo(Long id, Boolean ativo) {
-        UsuarioModel usuarioModel = usuarioRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
+        UsuarioModel usuarioModel = buscarUsuario(id);
         usuarioModel.setAtivo(ativo);
         return usuarioRepository.save(usuarioModel);
     }
 
     @Transactional
     public UsuarioModel updateAssinatura(Long id, Boolean assinatura) {
-        UsuarioModel usuarioModel = usuarioRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
+        UsuarioModel usuarioModel = buscarUsuario(id);
         usuarioModel.setAssinatura(assinatura);
         return usuarioRepository.save(usuarioModel);
     }
 
+    @CacheEvict(value = "matriculas", allEntries = true)
     @Transactional
     public void deleteById(Long id) {
+        if (!usuarioRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Usuário não encontrado: " + id);
+        }
         usuarioRepository.deleteById(id);
+        usuarioRepository.flush(); // aplica já, para que um vínculo (ex.: matrícula) vire 409 tratado
+    }
+
+    private UsuarioModel buscarUsuario(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + id));
+    }
+
+    private InstrumentoModel buscarInstrumento(Long id) {
+        return instrumentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Instrumento não encontrado: " + id));
+    }
+
+    private TipoUsuarioModel buscarTipoUsuario(Long id) {
+        return tipoUsuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de usuário não encontrado: " + id));
     }
 }

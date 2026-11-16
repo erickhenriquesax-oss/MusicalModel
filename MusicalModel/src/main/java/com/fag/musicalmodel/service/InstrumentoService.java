@@ -1,6 +1,7 @@
 package com.fag.musicalmodel.service;
 
 import com.fag.musicalmodel.dto.request.InstrumentoRequestDto;
+import com.fag.musicalmodel.exception.ResourceNotFoundException;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.repository.InstrumentoRepository;
 import jakarta.transaction.Transactional;
@@ -28,21 +29,20 @@ public class InstrumentoService {
     @CacheEvict(value = "instrumentos", allEntries = true)
     @Transactional
     public InstrumentoModel saveInstrumento(InstrumentoRequestDto instrumentoRequestDto){
-        try {
-            InstrumentoModel instrumento = new InstrumentoModel();
-            instrumento.setNome(instrumentoRequestDto.nome());
-            instrumento.setDescricao(instrumentoRequestDto.descricao());
+        InstrumentoModel instrumento = new InstrumentoModel();
+        instrumento.setNome(instrumentoRequestDto.nome());
+        instrumento.setDescricao(instrumentoRequestDto.descricao());
 
-            return instrumentoRepository.save(instrumento);
-        } catch (Exception e){
-            e.printStackTrace();
-            return null;
-        }
+        return instrumentoRepository.save(instrumento);
     }
 
     @CacheEvict(value = "instrumentos", allEntries = true)
     @Transactional
     public void deleteInstrumento(Long id){
+        if (!instrumentoRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Instrumento não encontrado: " + id);
+        }
         instrumentoRepository.deleteById(id);
+        instrumentoRepository.flush(); // aplica já, para que um instrumento em uso vire 409 tratado
     }
 }

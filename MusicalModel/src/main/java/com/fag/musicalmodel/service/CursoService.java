@@ -1,6 +1,8 @@
 package com.fag.musicalmodel.service;
 
 import com.fag.musicalmodel.dto.request.CursoRequestDto;
+import com.fag.musicalmodel.dto.response.CursoResponseDto;
+import com.fag.musicalmodel.exception.ResourceNotFoundException;
 import com.fag.musicalmodel.model.CursoModel;
 import com.fag.musicalmodel.model.InstrumentoModel;
 import com.fag.musicalmodel.repository.CursoRepository;
@@ -8,6 +10,7 @@ import com.fag.musicalmodel.repository.InstrumentoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,55 +26,71 @@ public class CursoService {
         this.instrumentoRepository = instrumentoRepository;
     }
 
+    // O cache guarda DTOs com o instrumento já resolvido (sem proxies lazy do Hibernate).
     @Cacheable(value = "cursos")
     @Transactional
-    public List<CursoModel> getAllCursos(){
-        return cursoRepository.findAll();
+    public List<CursoResponseDto> getAllCursos(){
+        return cursoRepository.findAll().stream().map(CursoResponseDto::new).toList();
     }
 
     @CacheEvict(value = "cursos", allEntries = true)
     @Transactional
-    public CursoModel saveCurso(CursoRequestDto cursoRequestDto){
-        try {
-            CursoModel curso = new CursoModel();
-            curso.setTitulo(cursoRequestDto.titulo());
-            curso.setDescricao(cursoRequestDto.descricao());
-            curso.setDuracao(cursoRequestDto.duracao());
-            curso.setConteudo(cursoRequestDto.conteudo());
-            curso.setAtivo(true);
+    public CursoResponseDto saveCurso(CursoRequestDto cursoRequestDto){
+        CursoModel curso = new CursoModel();
+        curso.setTitulo(cursoRequestDto.titulo());
+        curso.setDescricao(cursoRequestDto.descricao());
+        curso.setDuracao(cursoRequestDto.duracao());
+        curso.setConteudo(cursoRequestDto.conteudo());
+        curso.setAtivo(true);
+        curso.setInstrumentoModel(buscarInstrumento(cursoRequestDto.idInstrumento()));
 
-            if(cursoRequestDto.idInstrumento() != null){
-                InstrumentoModel instrumento = instrumentoRepository.findById(cursoRequestDto.idInstrumento()).get();
-                curso.setInstrumentoModel(instrumento);
-            }
+        return new CursoResponseDto(cursoRepository.save(curso));
+    }
 
-            return cursoRepository.save(curso);
-        } catch (Exception e){
-            e.printStackTrace();
-            return null;
-        }
+    // A listagem de matrículas em cache guarda o título do curso: precisa ser limpa quando ele muda.
+    @Caching(evict = {
+            @CacheEvict(value = "cursos", allEntries = true),
+            @CacheEvict(value = "matriculas", allEntries = true)
+    })
+    @Transactional
+    public CursoResponseDto updateCurso(Long id, CursoRequestDto cursoRequestDto){
+        CursoModel cursoUpdate = buscarCurso(id);
+        cursoUpdate.setTitulo(cursoRequestDto.titulo());
+        cursoUpdate.setDescricao(cursoRequestDto.descricao());
+        cursoUpdate.setDuracao(cursoRequestDto.duracao());
+        cursoUpdate.setConteudo(cursoRequestDto.conteudo());
+        cursoUpdate.setInstrumentoModel(buscarInstrumento(cursoRequestDto.idInstrumento()));
+        return new CursoResponseDto(cursoRepository.saveAndFlush(cursoUpdate));
     }
 
     @CacheEvict(value = "cursos", allEntries = true)
     @Transactional
-    public CursoModel updateCurso(Long id, CursoRequestDto cursoRequestDto){
-        try{
-            CursoModel cursoUpdate = cursoRepository.findById(id).get();
-            cursoUpdate.setTitulo(cursoRequestDto.titulo());
-            cursoUpdate.setDescricao(cursoRequestDto.descricao());
-            cursoUpdate.setDuracao(cursoRequestDto.duracao());
-            cursoUpdate.setConteudo(cursoRequestDto.conteudo());
-            cursoUpdate.setInstrumentoModel(instrumentoRepository.findById(cursoRequestDto.idInstrumento()).get());
-            return cursoRepository.save(cursoUpdate);
-        } catch (Exception e){
-            e.printStackTrace();
-            return null;
-        }
+    public CursoResponseDto updateAtivo(Long id, boolean ativo){
+        CursoModel curso = buscarCurso(id);
+        curso.setAtivo(ativo);
+        return new CursoResponseDto(cursoRepository.save(curso));
     }
 
-    @CacheEvict(value = "cursos", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "cursos", allEntries = true),
+            @CacheEvict(value = "matriculas", allEntries = true)
+    })
     @Transactional
     public void deleteCurso(Long id){
+        if (!cursoRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Curso não encontrado: " + id);
+        }
         cursoRepository.deleteById(id);
+        cursoRepository.flush(); // aplica já, para que um curso com matrículas vire 409 tratado
+    }
+
+    private CursoModel buscarCurso(Long id) {
+        return cursoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado: " + id));
+    }
+
+    private InstrumentoModel buscarInstrumento(Long idInstrumento) {
+        return instrumentoRepository.findById(idInstrumento)
+                .orElseThrow(() -> new ResourceNotFoundException("Instrumento não encontrado: " + idInstrumento));
     }
 }

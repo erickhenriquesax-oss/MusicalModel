@@ -4,6 +4,13 @@ package com.fag.musicalmodel.controller;
 import com.fag.musicalmodel.dto.request.CanalRequestDto;
 import com.fag.musicalmodel.model.CanalModel;
 import com.fag.musicalmodel.service.CanalService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/musicalmodel/canal")
+@Tag(name = "Canal", description = "Canais da mesa de som do simulador. Cada simulador tem 8 canais, criados no cadastro do usuário com todos os valores em 50.")
 public class CanalController {
 
     private final CanalService canalService;
@@ -22,16 +30,23 @@ public class CanalController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Busca canais por simulador", description = "Lista os canais do simulador informado pelo ID, ordenados pelo ID do canal.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de canais do simulador (vazia se o simulador não existir)", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CanalModel.class)))),
+            @ApiResponse(responseCode = "401", description = "Token ausente, inválido ou expirado")
+    })
     public ResponseEntity<List<CanalModel>> getCanalsBySimulador(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(canalService.findCanalByIdSimulador(id));
     }
 
-    @PostMapping
-    public ResponseEntity<CanalModel> save(@Valid @RequestBody CanalRequestDto canalRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(canalService.saveCanal(canalRequestDto));
-    }
-
     @PutMapping("/{id}")
+    @Operation(summary = "Ajusta canal", description = "Grava agudo, médio, grave e volume de um canal através do ID. Todos os valores são obrigatórios e devem estar entre 0 e 100.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Canal atualizado", content = @Content(schema = @Schema(implementation = CanalModel.class))),
+            @ApiResponse(responseCode = "400", description = "Campo ausente ou valor fora da faixa de 0 a 100"),
+            @ApiResponse(responseCode = "401", description = "Token ausente, inválido ou expirado"),
+            @ApiResponse(responseCode = "404", description = "Canal não encontrado")
+    })
     public ResponseEntity<CanalModel> update(@PathVariable Long id, @Valid @RequestBody CanalRequestDto canalRequestDto) {
         return ResponseEntity.status(HttpStatus.OK).body(canalService.updateCanal(id, canalRequestDto));
     }

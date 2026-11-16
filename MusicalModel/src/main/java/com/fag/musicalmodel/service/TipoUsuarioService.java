@@ -2,6 +2,7 @@ package com.fag.musicalmodel.service;
 
 
 import com.fag.musicalmodel.dto.request.TipoUsuarioRequestDto;
+import com.fag.musicalmodel.exception.ResourceNotFoundException;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.repository.TipoUsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -23,15 +24,10 @@ public class TipoUsuarioService {
     @CacheEvict(value = "tipousuario", allEntries = true)
     @Transactional
     public TipoUsuarioModel saveTipoUsuario(TipoUsuarioRequestDto tipoUsuarioRequestDto){
-        try{
-            TipoUsuarioModel tipoUsuarioModel = new TipoUsuarioModel();
-            tipoUsuarioModel.setDescricao(tipoUsuarioRequestDto.descricao());
+        TipoUsuarioModel tipoUsuarioModel = new TipoUsuarioModel();
+        tipoUsuarioModel.setDescricao(tipoUsuarioRequestDto.descricao());
 
-            return tipoUsuarioRepository.save(tipoUsuarioModel);
-        }catch(Exception e){
-            new Exception(e.getMessage());
-            return null;
-        }
+        return tipoUsuarioRepository.save(tipoUsuarioModel);
     }
 
     @Cacheable(value = "tipousuario")
@@ -43,6 +39,10 @@ public class TipoUsuarioService {
     @CacheEvict(value = "tipousuario", allEntries = true)
     @Transactional
     public void deleteTipoUsuario(Long id){
+        if (!tipoUsuarioRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Tipo de usuário não encontrado: " + id);
+        }
         tipoUsuarioRepository.deleteById(id);
+        tipoUsuarioRepository.flush(); // aplica já, para que um tipo em uso vire 409 tratado
     }
 }

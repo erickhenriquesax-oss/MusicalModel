@@ -2,46 +2,31 @@ package com.fag.musicalmodel.service;
 
 
 import com.fag.musicalmodel.dto.request.CanalRequestDto;
+import com.fag.musicalmodel.exception.ResourceNotFoundException;
 import com.fag.musicalmodel.model.CanalModel;
-import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.repository.CanalRepository;
-import com.fag.musicalmodel.repository.SimuladorRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Os canais são criados automaticamente com o simulador (8 canais em 50) no cadastro do usuário;
+ * aqui só há leitura e ajuste dos valores.
+ */
 @Service
 public class CanalService {
 
-    private final SimuladorRepository simuladorRepository;
     private final CanalRepository canalRepository;
 
-    public CanalService(CanalRepository canalRepository, SimuladorRepository simuladorRepository) {
+    public CanalService(CanalRepository canalRepository) {
         this.canalRepository = canalRepository;
-        this.simuladorRepository = simuladorRepository;
-    }
-
-    @Transactional
-    public CanalModel saveCanal(CanalRequestDto canalRequestDto) {
-        CanalModel canalModel = new CanalModel();
-        canalModel.setAgudo(50);
-        canalModel.setMedio(50);
-        canalModel.setGrave(50);
-        canalModel.setVolume(50);
-
-        if (canalRequestDto.idSimulador() != null) {
-            SimuladorModel simulador = simuladorRepository.findById(canalRequestDto.idSimulador())
-                    .orElseThrow(() -> new RuntimeException("Simulador não encontrado: " + canalRequestDto.idSimulador()));
-            canalModel.setSimuladorModel(simulador);
-        }
-
-        return canalRepository.save(canalModel);
     }
 
     @Transactional
     public CanalModel updateCanal(Long id, CanalRequestDto canalRequestDto) {
-        CanalModel canalModel = canalRepository.findCanalModelByIdCanal(id);
+        CanalModel canalModel = canalRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Canal não encontrado: " + id));
         canalModel.setGrave(canalRequestDto.grave());
         canalModel.setMedio(canalRequestDto.medio());
         canalModel.setAgudo(canalRequestDto.agudo());
@@ -51,6 +36,6 @@ public class CanalService {
 
     @Transactional
     public List<CanalModel> findCanalByIdSimulador(Long id) {
-        return canalRepository.findBySimuladorModel_IdSimulador(id);
+        return canalRepository.findBySimuladorModel_IdSimuladorOrderByIdCanalAsc(id);
     }
 }

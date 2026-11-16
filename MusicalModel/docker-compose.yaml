@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:18
     container_name: musicalmodel-postgres
-    restart: unless-stopped
+    restart:  unless-stopped
     labels:
       org.springframework.boot.ignore: true
     environment:
@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER no arquivo .env}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
     ports:
-      - "5433:5432"
+      - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
@@ -27,7 +27,7 @@ services:
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?Defina REDIS_PASSWORD no arquivo .env}
     ports:
-      - "6379:6379"
+      - "6381:6379"
     volumes:
       - redis_data:/data
     healthcheck:

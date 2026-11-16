@@ -2,6 +2,7 @@ package com.fag.musicalmodel.model;
 
 
 import com.fag.musicalmodel.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -83,11 +84,15 @@ public class UsuarioModel implements Serializable, UserDetails {
     @OneToOne(mappedBy = "usuarioModel", cascade = CascadeType.ALL)
     private SimuladorModel simuladorModel;
 
+    // Os getters de UserDetails abaixo são internos do Spring Security: @JsonIgnore impede que
+    // apareçam em respostas JSON e no schema do Swagger (inclusive o hash da senha em getPassword).
+    @JsonIgnore
     public UserRole getUserRole() {
         return this.tipo_usuario != null ? this.tipo_usuario.toUserRole() : null;
     }
 
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (getUserRole() != null && getUserRole().getAuthority() != null) {
@@ -96,33 +101,40 @@ public class UsuarioModel implements Serializable, UserDetails {
         return List.of();
     }
 
+    @JsonIgnore
     @Override
     public @Nullable String getPassword() {
         return this.senha;
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return this.email;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    // Usuário desativado (ativo = false) não consegue autenticar.
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.ativo;
     }
 }

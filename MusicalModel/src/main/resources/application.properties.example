@@ -2,12 +2,12 @@ spring.application.name=MusicalModel
 spring.config.import=optional:file:.env[.properties]
 spring.docker.compose.enabled=false
 
-spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5433/MusicalModel}
+spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5435/MusicalModel}
 spring.datasource.username=${POSTGRES_USER}
 spring.datasource.password=${POSTGRES_PASSWORD}
 
 spring.data.redis.host=${REDIS_HOST:127.0.0.1}
-spring.data.redis.port=${REDIS_PORT:6379}
+spring.data.redis.port=${REDIS_PORT:6381}
 spring.data.redis.password=${REDIS_PASSWORD}
 spring.cache.type=redis
 spring.cache.cache-names=cursos,instrumentos,matriculas,tipousuario
