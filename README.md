@@ -187,8 +187,9 @@ src/main/java/com/fag/musicalmodel/
 
 | Método | Endpoint | Permissão | Descrição |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/musicalmodel/usuario/login` | Pública | Realiza login e retorna o Token JWT |
-| `POST` | `/musicalmodel/usuario` | Pública | Cadastro inicial de usuário |
+| `POST` | `/musicalmodel/usuario/login` | Pública | Realiza login e retorna o token JWT, `idUsuario`, `nome`, `role` e instrumento |
+| `POST` | `/musicalmodel/usuario` | Pública | Cadastro inicial de usuário (sempre como ALUNO) |
+| `PUT` | `/musicalmodel/usuario/{id}/instrumento/{idInstrumento}` | Autenticado (próprio usuário) | Define o instrumento gratuito; a escolha é permanente |
 | `GET` | `/musicalmodel/usuario` | `ROLE_ADMIN` | Lista todos os usuários |
 | `GET` | `/musicalmodel/usuario/{id}` | Autenticado | Busca usuário por ID |
 | `PATCH`| `/musicalmodel/usuario/{id}/ativo` | `ROLE_ADMIN` | Ativa ou desativa usuário |
@@ -207,9 +208,13 @@ src/main/java/com/fag/musicalmodel/
 | `PATCH`| `/musicalmodel/simulador/{idSimulador}/volume-master?volume=N` | Autenticado | Ajusta o volume master (0 a 100) |
 | `GET` | `/musicalmodel/canal/{idSimulador}`| Autenticado | Obtém os 8 canais da mesa de som |
 | `PUT` | `/musicalmodel/canal/{idCanal}`| Autenticado | Ajusta agudo, médio, grave e volume do canal (0 a 100) |
+| `PATCH`| `/musicalmodel/canal/{idCanal}/nome`| Autenticado | Renomeia o canal (`{"nome": "Voz principal"}`, máx. 30 caracteres) |
 
 ### Regras de negócio
-- **Simulador e canais:** no cadastro, cada usuário ganha um simulador (volume master 80) com **8 canais**, todos com agudo, médio, grave e volume em **50**. Os canais não são criados nem removidos pela API; o front só ajusta os valores pelo `PUT`, sempre de **0 a 100**. Ao excluir o usuário, o simulador e os canais são removidos junto.
+- **Cadastro:** o cadastro público sempre cria o usuário como ALUNO; o `idTipoUsuario` enviado é ignorado. Na edição (`PUT /usuario/{id}`), o tipo só muda quando quem chama é ADMIN.
+- **Instrumento:** depois do cadastro, o front chama `PUT /usuario/{id}/instrumento/{idInstrumento}` (sem corpo). O usuário só define o da própria conta, e só uma vez (`409` na segunda tentativa); o ADMIN pode trocar.
+- **Simulador e canais:** no cadastro, cada usuário ganha um simulador (volume master 80) com **8 canais**, nomeados de "Canal 1" a "Canal 8", todos com agudo, médio, grave e volume em **50**. O cadastro segue a cadeia `UsuarioService` → `SimuladorService.criarSimulador` → `CanalService.criarCanaisPadrao` (laço de 1 a 8), tudo na mesma transação. Os canais não são criados nem removidos pela API; o front ajusta os valores pelo `PUT` (sempre de **0 a 100**) e o nome pelo `PATCH /nome`. Valores, nomes e volume master ficam gravados no banco e voltam iguais na próxima sessão do usuário. Ao excluir o usuário, o simulador e os canais são removidos junto.
+- **Conteúdo do curso:** coluna `TEXT`, com até **10.000 caracteres** (validado no DTO). Em bancos criados antes dessa mudança, rode uma vez: `ALTER TABLE tb_curso ALTER COLUMN conteudo TYPE TEXT;` (o `ddl-auto=update` não altera o tipo de colunas existentes).
 - **Matrícula:** o usuário e o curso precisam estar ativos, e não pode haver duas matrículas `ATIVA` do mesmo usuário no mesmo curso (`409`).
 - **Exclusão com vínculos:** curso com matrículas, instrumento ou tipo em uso e usuário com matrículas não podem ser excluídos (`409`). Para tirar um curso de circulação, desative-o.
 

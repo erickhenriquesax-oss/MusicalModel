@@ -1,5 +1,6 @@
 package com.fag.musicalmodel.controller;
 
+import com.fag.musicalmodel.config.JWTUserData;
 import com.fag.musicalmodel.config.TokenConfig;
 import com.fag.musicalmodel.dto.request.LoginDto;
 import com.fag.musicalmodel.dto.request.UsuarioRequestDto;
@@ -26,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,9 +55,9 @@ public class UsuarioController {
 
     @PostMapping("/login")
     @SecurityRequirements
-    @Operation(summary = "Realiza login", description = "Autentica com e-mail e senha e retorna um token JWT. Não exige autenticação.")
+    @Operation(summary = "Realiza login", description = "Autentica com e-mail e senha e retorna o token JWT junto com o ID, o nome, o papel (ALUNO/ADMIN) e o instrumento do usuário. Não exige autenticação.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Autenticação bem-sucedida; retorna o token JWT", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Autenticação bem-sucedida; retorna o token e os dados do usuário", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
             @ApiResponse(responseCode = "400", description = "Corpo inválido ou campos obrigatórios ausentes"),
             @ApiResponse(responseCode = "401", description = "E-mail ou senha inválidos"),
             @ApiResponse(responseCode = "403", description = "Usuário desativado")
@@ -67,7 +69,7 @@ public class UsuarioController {
 
         UsuarioModel usuario = (UsuarioModel) authentication.getPrincipal(); //pegar o usuario
         String token = tokenConfig.generateToken(usuario); //gera o token
-        return ResponseEntity.ok(new LoginResponse(token));
+        return ResponseEntity.ok(new LoginResponse(token, usuario));
     }
 
     public UsuarioController(UsuarioService usuarioService) {
@@ -102,11 +104,11 @@ public class UsuarioController {
 
     @PostMapping
     @SecurityRequirements
-    @Operation(summary = "Cadastra usuário", description = "Cria um novo usuário. Não exige autenticação.")
+    @Operation(summary = "Cadastra usuário", description = "Cria um novo usuário, sempre como ALUNO (o idTipoUsuario enviado é ignorado). Também cria o simulador com 8 canais. Não exige autenticação.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Usuário criado", content = @Content(schema = @Schema(implementation = UsuarioResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Corpo inválido ou campos obrigatórios ausentes"),
-            @ApiResponse(responseCode = "404", description = "Instrumento ou tipo de usuário não encontrado"),
+            @ApiResponse(responseCode = "404", description = "Instrumento não encontrado"),
             @ApiResponse(responseCode = "409", description = "E-mail ou CPF já cadastrado")
     })
     public ResponseEntity<UsuarioResponseDto> saveUsuario(@Valid @RequestBody UsuarioRequestDto usuarioRequestDto) {
@@ -115,7 +117,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualiza usuário", description = "Atualiza os dados do usuário informado pelo ID.")
+    @Operation(summary = "Atualiza usuário", description = "Atualiza os dados do usuário informado pelo ID. O idTipoUsuario só é aplicado quando quem chama é ADMIN; para os demais é ignorado.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuário atualizado", content = @Content(schema = @Schema(implementation = UsuarioResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Corpo inválido ou campos obrigatórios ausentes"),
@@ -123,9 +125,24 @@ public class UsuarioController {
             @ApiResponse(responseCode = "404", description = "Usuário, instrumento ou tipo de usuário não encontrado"),
             @ApiResponse(responseCode = "409", description = "E-mail ou CPF já cadastrado para outro usuário")
     })
-    public ResponseEntity<UsuarioResponseDto> updateUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioRequestDto usuarioRequestDto) {
-        UsuarioModel usuarioAtualizado = usuarioService.updateUsuario(id, usuarioRequestDto);
+    public ResponseEntity<UsuarioResponseDto> updateUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioRequestDto usuarioRequestDto,
+                                                            @AuthenticationPrincipal JWTUserData solicitante) {
+        UsuarioModel usuarioAtualizado = usuarioService.updateUsuario(id, usuarioRequestDto, solicitante);
         return ResponseEntity.ok(new UsuarioResponseDto(usuarioAtualizado));
+    }
+
+    @PutMapping("/{id}/instrumento/{idInstrumento}")
+    @Operation(summary = "Define o instrumento do usuário", description = "Grava o instrumento gratuito escolhido pelo usuário (tela de seleção após o cadastro). Recebe apenas os IDs no caminho, sem corpo. A escolha é permanente: depois de definida, só um ADMIN pode alterá-la. O usuário só pode definir o instrumento da própria conta.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Instrumento definido", content = @Content(schema = @Schema(implementation = UsuarioResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "Token ausente, inválido ou expirado"),
+            @ApiResponse(responseCode = "403", description = "Tentativa de definir o instrumento de outro usuário"),
+            @ApiResponse(responseCode = "404", description = "Usuário ou instrumento não encontrado"),
+            @ApiResponse(responseCode = "409", description = "O instrumento já foi escolhido")
+    })
+    public ResponseEntity<UsuarioResponseDto> definirInstrumento(@PathVariable Long id, @PathVariable Long idInstrumento,
+                                                                 @AuthenticationPrincipal JWTUserData solicitante) {
+        return ResponseEntity.ok(new UsuarioResponseDto(usuarioService.definirInstrumento(id, idInstrumento, solicitante)));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -1,43 +1,48 @@
 package com.fag.musicalmodel.service;
 
-import com.fag.musicalmodel.dto.request.SimuladorRequestDto;
 import com.fag.musicalmodel.exception.ResourceNotFoundException;
+import com.fag.musicalmodel.model.CanalModel;
 import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.model.UsuarioModel;
 import com.fag.musicalmodel.repository.SimuladorRepository;
-import com.fag.musicalmodel.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class SimuladorService {
 
-    private final SimuladorRepository simuladorRepository;
-    private final UsuarioRepository usuarioRepository;
+    public static final int VOLUME_MASTER_PADRAO = 80;
 
-    public SimuladorService(SimuladorRepository simuladorRepository, UsuarioRepository usuarioRepository) {
+    private final SimuladorRepository simuladorRepository;
+    private final CanalService canalService;
+
+    public SimuladorService(SimuladorRepository simuladorRepository, CanalService canalService) {
         this.simuladorRepository = simuladorRepository;
-        this.usuarioRepository = usuarioRepository;
+        this.canalService = canalService;
+    }
+
+    /**
+     * Cria o simulador do usuário recém-cadastrado (volume master 80) e pede ao CanalService os 8 canais.
+     * Roda na mesma transação do cadastro: se algo falhar, nada é gravado.
+     */
+    @Transactional
+    public SimuladorModel criarSimulador(UsuarioModel usuario) {
+        SimuladorModel simulador = new SimuladorModel();
+        simulador.setVolume_master(VOLUME_MASTER_PADRAO);
+        simulador.setUsuarioModel(usuario);
+        simulador = simuladorRepository.save(simulador);
+
+        List<CanalModel> canais = canalService.criarCanaisPadrao(simulador);
+        simulador.getCanalModel().addAll(canais);
+        return simulador;
     }
 
     @Transactional
     public SimuladorModel getSimuladorByUsuarioModel_IdUsuario(Long idUsuario) {
         return simuladorRepository.findByUsuarioModel_IdUsuario(idUsuario)
                 .orElseThrow(() -> new ResourceNotFoundException("Simulador não encontrado para o usuário: " + idUsuario));
-    }
-
-    @Transactional
-    public SimuladorModel saveSimulador(SimuladorRequestDto simuladorDto){
-        SimuladorModel simulador = new SimuladorModel();
-        simulador.setVolume_master(simuladorDto.volume_master());
-
-        if (simuladorDto.id_usuario() != null) {
-            UsuarioModel usuario = usuarioRepository.findById(simuladorDto.id_usuario())
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + simuladorDto.id_usuario()));
-            simulador.setUsuarioModel(usuario);
-        }
-
-        return simuladorRepository.save(simulador);
     }
 
     @Transactional

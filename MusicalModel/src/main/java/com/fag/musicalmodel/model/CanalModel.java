@@ -27,6 +27,10 @@ public class CanalModel implements Serializable {
     @JoinColumn(name = "id_simulador",  nullable = false)
     private SimuladorModel simuladorModel;
 
+    // Descrição exibida na mesa de som: "Canal 1" a "Canal 8", definida na criação do simulador.
+    @Column(name = "nome", length = 30)
+    private String nome;
+
     @Column(name = "agudo")
     private int agudo;
 

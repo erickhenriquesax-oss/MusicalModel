@@ -1,12 +1,14 @@
 package com.fag.musicalmodel.controller;
 
 
+import com.fag.musicalmodel.dto.request.CanalNomeRequestDto;
 import com.fag.musicalmodel.dto.request.CanalRequestDto;
 import com.fag.musicalmodel.model.CanalModel;
 import com.fag.musicalmodel.service.CanalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -49,5 +51,18 @@ public class CanalController {
     })
     public ResponseEntity<CanalModel> update(@PathVariable Long id, @Valid @RequestBody CanalRequestDto canalRequestDto) {
         return ResponseEntity.status(HttpStatus.OK).body(canalService.updateCanal(id, canalRequestDto));
+    }
+
+    @PatchMapping("/{id}/nome")
+    @Operation(summary = "Renomeia canal", description = "Altera o nome (descrição) de um canal, ex.: \"Voz principal\". O nome fica gravado e volta nas próximas sessões do usuário.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(value = "{\"nome\": \"Voz principal\"}"))))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Canal renomeado", content = @Content(schema = @Schema(implementation = CanalModel.class))),
+            @ApiResponse(responseCode = "400", description = "Nome ausente, em branco ou com mais de 30 caracteres"),
+            @ApiResponse(responseCode = "401", description = "Token ausente, inválido ou expirado"),
+            @ApiResponse(responseCode = "404", description = "Canal não encontrado")
+    })
+    public ResponseEntity<CanalModel> renomear(@PathVariable Long id, @Valid @RequestBody CanalNomeRequestDto canalNomeRequestDto) {
+        return ResponseEntity.ok(canalService.renomearCanal(id, canalNomeRequestDto));
     }
 }

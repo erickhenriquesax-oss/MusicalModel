@@ -16,9 +16,6 @@ import java.util.List;
 public class SimuladorModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public static final int QUANTIDADE_CANAIS = 8;
-    public static final int VALOR_PADRAO_CANAL = 50;
-
     @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,21 +29,8 @@ public class SimuladorModel implements Serializable {
     @Column(name = "volume_master")
     private Integer volume_master;
 
-    // Os canais pertencem ao simulador: são criados e removidos junto com ele.
+    // Os canais são criados pelo CanalService e removidos junto com o simulador.
     @OneToMany(mappedBy = "simuladorModel", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("idCanal ASC")
     private List<CanalModel> canalModel = new ArrayList<>();
-
-    /** Cria os 8 canais da mesa de som com agudo, médio, grave e volume em 50. */
-    public void criarCanaisPadrao() {
-        for (int i = 0; i < QUANTIDADE_CANAIS; i++) {
-            CanalModel canal = new CanalModel();
-            canal.setAgudo(VALOR_PADRAO_CANAL);
-            canal.setMedio(VALOR_PADRAO_CANAL);
-            canal.setGrave(VALOR_PADRAO_CANAL);
-            canal.setVolume(VALOR_PADRAO_CANAL);
-            canal.setSimuladorModel(this);
-            this.canalModel.add(canal);
-        }
-    }
 }

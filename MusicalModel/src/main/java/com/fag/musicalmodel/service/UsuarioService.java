@@ -1,18 +1,20 @@
 package com.fag.musicalmodel.service;
 
+import com.fag.musicalmodel.config.JWTUserData;
 import com.fag.musicalmodel.dto.request.UsuarioRequestDto;
+import com.fag.musicalmodel.enums.UserRole;
+import com.fag.musicalmodel.exception.BusinessException;
 import com.fag.musicalmodel.exception.ResourceNotFoundException;
 import com.fag.musicalmodel.model.InstrumentoModel;
-import com.fag.musicalmodel.model.SimuladorModel;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.model.UsuarioModel;
 import com.fag.musicalmodel.repository.InstrumentoRepository;
-import com.fag.musicalmodel.repository.SimuladorRepository;
 import com.fag.musicalmodel.repository.TipoUsuarioRepository;
 import com.fag.musicalmodel.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,18 +26,18 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final InstrumentoRepository instrumentoRepository;
     private final TipoUsuarioRepository tipoUsuarioRepository;
-    private final SimuladorRepository simuladorRepository;
+    private final SimuladorService simuladorService;
     @Autowired
     private PasswordEncoder encoder;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           InstrumentoRepository instrumentoRepository,
                           TipoUsuarioRepository tipoUsuarioRepository,
-                          SimuladorRepository simuladorRepository) {
+                          SimuladorService simuladorService) {
         this.usuarioRepository = usuarioRepository;
         this.instrumentoRepository = instrumentoRepository;
         this.tipoUsuarioRepository = tipoUsuarioRepository;
-        this.simuladorRepository = simuladorRepository;
+        this.simuladorService = simuladorService;
     }
 
 
@@ -66,23 +68,41 @@ public class UsuarioService {
         usuarioModel.setComplemento(usuarioRequestDto.complemento());
         usuarioModel.setHoras_estudadas(0);
 
-        SimuladorModel simuladorModel = new SimuladorModel();
-        simuladorModel.setVolume_master(80);
-        simuladorModel.setUsuarioModel(usuarioModel);
-        simuladorModel.criarCanaisPadrao(); // 8 canais com todos os valores em 50
-        usuarioModel.setSimuladorModel(simuladorModel);
         if (usuarioRequestDto.idInstrumento() != null) {
             usuarioModel.setInstrumentoModel(buscarInstrumento(usuarioRequestDto.idInstrumento()));
         }
-        usuarioModel.setTipo_usuario(buscarTipoUsuario(usuarioRequestDto.idTipoUsuario()));
+        // Cadastro público: sempre ALUNO, independentemente do que vier no corpo.
+        usuarioModel.setTipo_usuario(buscarTipoUsuario(UserRole.ALUNO.getCodigo()));
 
-        return usuarioRepository.save(usuarioModel);
+        UsuarioModel usuarioSalvo = usuarioRepository.save(usuarioModel);
+
+        // Usuário -> SimuladorService (cria o simulador) -> CanalService (cria os 8 canais), tudo na mesma transação.
+        usuarioSalvo.setSimuladorModel(simuladorService.criarSimulador(usuarioSalvo));
+        return usuarioSalvo;
+    }
+
+    /**
+     * Define o instrumento gratuito do usuário (tela "Selecione seu Instrumento").
+     * A escolha é permanente: depois de definida, só um ADMIN pode trocá-la.
+     */
+    @Transactional
+    public UsuarioModel definirInstrumento(Long idUsuario, Long idInstrumento, JWTUserData solicitante) {
+        boolean admin = solicitante.isAdmin();
+        if (!admin && !idUsuario.equals(solicitante.userId())) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "Você só pode definir o instrumento da sua própria conta");
+        }
+        UsuarioModel usuario = buscarUsuario(idUsuario);
+        if (usuario.getInstrumentoModel() != null && !admin) {
+            throw BusinessException.conflito("O instrumento já foi escolhido e não pode ser alterado");
+        }
+        usuario.setInstrumentoModel(buscarInstrumento(idInstrumento));
+        return usuarioRepository.save(usuario);
     }
 
     // A listagem de matrículas em cache guarda o nome do usuário: precisa ser limpa quando ele muda.
     @CacheEvict(value = "matriculas", allEntries = true)
     @Transactional
-    public UsuarioModel updateUsuario(Long id, UsuarioRequestDto usuarioRequestDto) {
+    public UsuarioModel updateUsuario(Long id, UsuarioRequestDto usuarioRequestDto, JWTUserData solicitante) {
         UsuarioModel usuarioUpdate = buscarUsuario(id);
         usuarioUpdate.setNome(usuarioRequestDto.nome());
         usuarioUpdate.setEmail(usuarioRequestDto.email());
@@ -97,7 +117,10 @@ public class UsuarioService {
         if (usuarioRequestDto.idInstrumento() != null) {
             usuarioUpdate.setInstrumentoModel(buscarInstrumento(usuarioRequestDto.idInstrumento()));
         }
-        usuarioUpdate.setTipo_usuario(buscarTipoUsuario(usuarioRequestDto.idTipoUsuario()));
+        // Só um ADMIN pode trocar o tipo de usuário; para os demais o campo é ignorado.
+        if (usuarioRequestDto.idTipoUsuario() != null && solicitante.isAdmin()) {
+            usuarioUpdate.setTipo_usuario(buscarTipoUsuario(usuarioRequestDto.idTipoUsuario()));
+        }
 
         return usuarioRepository.save(usuarioUpdate);
     }
