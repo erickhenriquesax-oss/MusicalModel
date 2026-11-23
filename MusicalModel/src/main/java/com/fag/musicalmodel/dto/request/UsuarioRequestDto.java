@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record UsuarioRequestDto(
-        // Ignorado no cadastro público (sempre ALUNO). Na edição, só um ADMIN consegue alterá-lo.
         Long idTipoUsuario,
 
         @NotBlank(message = "A senha é obrigatória")

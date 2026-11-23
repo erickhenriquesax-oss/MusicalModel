@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,13 +39,8 @@ public class SecurityFilter extends OncePerRequestFilter {
 
                 JWTUserData user = optUser.get();
 
-                // O token continua válido até expirar, então a cada requisição confirmamos no banco
-                // que o usuário ainda existe e está ativo. Assim, desativar um usuário bloqueia na hora.
                 if (user.userId() == null || !usuarioRepository.existsByIdUsuarioAndAtivoTrue(user.userId())) {
-                    response.setStatus(HttpStatus.FORBIDDEN.value());
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-                    response.getWriter().write("{\"erro\":\"Usuário desativado ou inexistente\"}");
+                    RespostaErro.escrever(response, HttpStatus.UNAUTHORIZED, "Usuário desativado ou inexistente");
                     return;
                 }
 

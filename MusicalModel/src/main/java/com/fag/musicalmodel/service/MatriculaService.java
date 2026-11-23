@@ -31,8 +31,6 @@ public class MatriculaService {
         this.cursoRepository = cursoRepository;
     }
 
-    // O cache guarda DTOs (e não entidades) para não armazenar proxies lazy do Hibernate,
-    // que não podem ser inicializados depois de lidos do Redis.
     @Cacheable(value = "matriculas")
     @Transactional
     public List<MatriculaResponseDto> getAllMatriculas(){
@@ -83,7 +81,6 @@ public class MatriculaService {
         MatriculaModel matricula = matriculaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Matrícula não encontrada: " + id));
 
-        // Reativar não pode gerar duas matrículas ativas para o mesmo usuário e curso
         if (novoStatus == StatusMatricula.ATIVA && matriculaRepository
                 .existsByUsuarioModel_IdUsuarioAndCursoModel_IdCursoAndStatusAndIdMatriculaNot(
                         matricula.getUsuarioModel().getIdUsuario(), matricula.getCursoModel().getIdCurso(),

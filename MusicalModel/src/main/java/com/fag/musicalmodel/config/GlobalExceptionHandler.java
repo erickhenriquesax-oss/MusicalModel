@@ -29,16 +29,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Padroniza as respostas de erro da API:
- * - validação de campos do corpo: 400 {"campo": "mensagem"}
- * - demais erros: {"erro": "mensagem"}
- */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Extrai o nome da coluna da mensagem do PostgreSQL, ex.: "Key (email)=(x) already exists."
     private static final Pattern COLUNA_DUPLICADA = Pattern.compile("\\((\\w+)\\)=\\(");
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -52,7 +46,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    // Validação de parâmetros de query/path (ex.: volume fora de 0 a 100)
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<Map<String, String>> handleMethodValidation(HandlerMethodValidationException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -83,7 +76,6 @@ public class GlobalExceptionHandler {
         return erro(HttpStatus.FORBIDDEN, "Usuário desativado");
     }
 
-    // Restrições do banco: valor duplicado, registro em uso ou texto maior que a coluna
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
         Throwable causa = NestedExceptionUtils.getMostSpecificCause(ex);

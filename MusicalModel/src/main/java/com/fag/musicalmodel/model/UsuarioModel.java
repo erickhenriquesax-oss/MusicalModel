@@ -84,8 +84,6 @@ public class UsuarioModel implements Serializable, UserDetails {
     @OneToOne(mappedBy = "usuarioModel", cascade = CascadeType.ALL)
     private SimuladorModel simuladorModel;
 
-    // Os getters de UserDetails abaixo são internos do Spring Security: @JsonIgnore impede que
-    // apareçam em respostas JSON e no schema do Swagger (inclusive o hash da senha em getPassword).
     @JsonIgnore
     public UserRole getUserRole() {
         return this.tipo_usuario != null ? this.tipo_usuario.toUserRole() : null;
@@ -131,10 +129,9 @@ public class UsuarioModel implements Serializable, UserDetails {
         return true;
     }
 
-    // Usuário desativado (ativo = false) não consegue autenticar.
     @JsonIgnore
     @Override
     public boolean isEnabled() {
-        return this.ativo;
+        return true;
     }
 }

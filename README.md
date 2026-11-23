@@ -79,17 +79,17 @@ O sistema adota autenticação **Stateless** com JWT e controle de permissões b
   - O retorno de dados de usuários é encapsulado em **`UsuarioResponseDto`**, ocultando dados internos e expondo apenas informações seguras.
   - As matrículas são retornadas como **`MatriculaResponseDto`** (apenas id/nome do usuário e id/título do curso), evitando expor os dados completos do usuário.
   - Os getters internos do Spring Security em `UsuarioModel` (`getPassword`, `getAuthorities` etc.) usam `@JsonIgnore`, então não aparecem em respostas nem no Swagger.
-- **Usuário desativado:** não consegue fazer login (`403 Usuário desativado`), e tokens já emitidos param de funcionar na hora, pois o `SecurityFilter` confere no banco a cada requisição se o usuário ainda existe e está ativo.
+- **Usuário desativado:** com a senha errada o login responde `401 E-mail ou senha inválidos` (não revela que a conta existe); com a senha certa responde `403 Usuário desativado`. Tokens já emitidos param de funcionar na hora (`401`), pois o `SecurityFilter` confere no banco a cada requisição se o usuário ainda existe e está ativo.
 
 ### Tratamento de Erros
-Todas as respostas de erro usam o formato `{"erro": "..."}`, exceto a validação de campos, que retorna `{"campo": "mensagem"}`.
+Todas as respostas de erro usam o formato `{"erro": "..."}`, exceto a validação de campos, que retorna `{"campo": "mensagem"}`. Isso vale também para os erros do Spring Security (`401`/`403`) e para os erros tratados pelo `ErroController` (`/error`).
 
 | Situação | Status |
 | :--- | :--- |
 | Campo obrigatório ausente, acima do tamanho máximo ou fora da faixa (ex.: volume fora de 0 a 100) | `400` com `{"campo": "mensagem"}` |
-| JSON malformado, parâmetro ausente, tipo inválido ou enum inválido (com a lista de valores aceitos) | `400` |
-| E-mail ou senha inválidos no login | `401` |
-| Usuário desativado / sem permissão | `403` |
+| JSON malformado, parâmetro ausente, tipo inválido, número decimal em campo inteiro ou enum inválido (com a lista de valores aceitos) | `400` |
+| E-mail ou senha inválidos no login; token ausente, inválido, expirado ou de usuário desativado/excluído | `401` |
+| Login de usuário desativado (com a senha certa) ou sem permissão para a rota (ex.: ALUNO em rota de ADMIN) | `403` |
 | Recurso inexistente (`ResourceNotFoundException`) ou rota inexistente | `404` |
 | Valor duplicado (e-mail, CPF, título, nome), registro em uso ao excluir, ou regra de negócio violada (`BusinessException`) | `409` |
 
@@ -128,8 +128,11 @@ O código-fonte segue a arquitetura em camadas limpa e separada por responsabili
 src/main/java/com/fag/musicalmodel/
 │
 ├── config/                 # Configurações de Segurança, Filtros, JWT e Swagger
-│   ├── GlobalExceptionHandler.java # Tratamento global de erros (400 / 404)
+│   ├── ErroController.java # Respostas de /error no formato {"erro"}
+│   ├── GlobalExceptionHandler.java # Tratamento global de erros
+│   ├── JacksonConfig.java  # Recusa número decimal em campo inteiro
 │   ├── JWTUserData.java    # Record do usuário extraído do token
+│   ├── RespostaErro.java   # Escreve {"erro"} nas respostas 401/403 da segurança
 │   ├── SecurityConfig.java # Cadeia de filtros e @EnableMethodSecurity
 │   ├── SecurityFilter.java # Filtro interceptor e injeção de Grants/Roles
 │   ├── SwaggerConfiguration.java # Configuração do OpenAPI e autenticação JWT
@@ -146,13 +149,12 @@ src/main/java/com/fag/musicalmodel/
 │
 ├── dto/                    # Objetos de Transferência de Dados
 │   ├── request/            # DTOs de Entrada (validados com Bean Validation)
+│   │   ├── CanalNomeRequestDto.java
 │   │   ├── CanalRequestDto.java
 │   │   ├── CursoRequestDto.java
 │   │   ├── InstrumentoRequestDto.java
 │   │   ├── LoginDto.java
 │   │   ├── MatriculaRequestDto.java
-│   │   ├── SimuladorRequestDto.java
-│   │   ├── TipoUsuarioRequestDto.java
 │   │   └── UsuarioRequestDto.java
 │   └── response/           # DTOs de Saída (sem campos sensíveis)
 │       ├── CursoResponseDto.java
@@ -203,7 +205,7 @@ src/main/java/com/fag/musicalmodel/
 | `POST` | `/musicalmodel/matricula` | Autenticado | Realiza matrícula em um curso |
 | `PATCH`| `/musicalmodel/matricula/{id}/status` | Autenticado | Atualiza status da matrícula |
 | `DELETE`| `/musicalmodel/matricula/{id}` | `ROLE_ADMIN` | Exclui matrícula |
-| `GET` | `/musicalmodel/tipousuario` | `ROLE_ADMIN` | Lista tipos de usuário (com Cache) |
+| `GET` | `/musicalmodel/tipousuario` | `ROLE_ADMIN` | Lista tipos de usuário (com Cache). Não é possível criar tipos novos: existem só ALUNO e ADMIN |
 | `GET` | `/musicalmodel/simulador/{idUsuario}` | Autenticado | Obtém o simulador do usuário |
 | `PATCH`| `/musicalmodel/simulador/{idSimulador}/volume-master?volume=N` | Autenticado | Ajusta o volume master (0 a 100) |
 | `GET` | `/musicalmodel/canal/{idSimulador}`| Autenticado | Obtém os 8 canais da mesa de som |
@@ -211,9 +213,11 @@ src/main/java/com/fag/musicalmodel/
 | `PATCH`| `/musicalmodel/canal/{idCanal}/nome`| Autenticado | Renomeia o canal (`{"nome": "Voz principal"}`, máx. 30 caracteres) |
 
 ### Regras de negócio
-- **Cadastro:** o cadastro público sempre cria o usuário como ALUNO; o `idTipoUsuario` enviado é ignorado. Na edição (`PUT /usuario/{id}`), o tipo só muda quando quem chama é ADMIN.
+- **Cadastro:** o cadastro público sempre cria o usuário como ALUNO; o `idTipoUsuario` enviado é ignorado. Na edição (`PUT /usuario/{id}`), o tipo só muda quando quem chama é ADMIN. Um `idTipoUsuario` diferente de ALUNO (1) ou ADMIN (2) retorna `404 Tipo de usuário inexistente`.
+- **E-mail:** é gravado sem espaços e em minúsculo, e o login aceita o e-mail com qualquer combinação de maiúsculas e minúsculas. Por isso `Fulano@Email.com` e `fulano@email.com` são o mesmo e-mail (`409` no segundo cadastro).
+- **Nome do instrumento:** é gravado sem espaços nas pontas e em minúsculo (`Violão` vira `violão`), então nomes que só mudam a caixa contam como duplicados (`409`).
 - **Instrumento:** depois do cadastro, o front chama `PUT /usuario/{id}/instrumento/{idInstrumento}` (sem corpo). O usuário só define o da própria conta, e só uma vez (`409` na segunda tentativa); o ADMIN pode trocar.
-- **Simulador e canais:** no cadastro, cada usuário ganha um simulador (volume master 80) com **8 canais**, nomeados de "Canal 1" a "Canal 8", todos com agudo, médio, grave e volume em **50**. O cadastro segue a cadeia `UsuarioService` → `SimuladorService.criarSimulador` → `CanalService.criarCanaisPadrao` (laço de 1 a 8), tudo na mesma transação. Os canais não são criados nem removidos pela API; o front ajusta os valores pelo `PUT` (sempre de **0 a 100**) e o nome pelo `PATCH /nome`. Valores, nomes e volume master ficam gravados no banco e voltam iguais na próxima sessão do usuário. Ao excluir o usuário, o simulador e os canais são removidos junto.
+- **Simulador e canais:** no cadastro, cada usuário ganha um simulador (volume master 80) com **8 canais**, nomeados de "Canal 1" a "Canal 8", todos com agudo, médio, grave e volume em **50**. O cadastro segue a cadeia `UsuarioService` → `SimuladorService.criarSimulador` → `CanalService.criarCanaisPadrao` (laço de 1 a 8), tudo na mesma transação. Os canais não são criados nem removidos pela API; o front ajusta os valores pelo `PUT` (sempre números inteiros de **0 a 100**; decimais como `50.7` retornam `400`) e o nome pelo `PATCH /nome`. Valores, nomes e volume master ficam gravados no banco e voltam iguais na próxima sessão do usuário. Ao excluir o usuário, o simulador e os canais são removidos junto.
 - **Conteúdo do curso:** coluna `TEXT`, com até **10.000 caracteres** (validado no DTO). Em bancos criados antes dessa mudança, rode uma vez: `ALTER TABLE tb_curso ALTER COLUMN conteudo TYPE TEXT;` (o `ddl-auto=update` não altera o tipo de colunas existentes).
 - **Matrícula:** o usuário e o curso precisam estar ativos, e não pode haver duas matrículas `ATIVA` do mesmo usuário no mesmo curso (`409`).
 - **Exclusão com vínculos:** curso com matrículas, instrumento ou tipo em uso e usuário com matrículas não podem ser excluídos (`409`). Para tirar um curso de circulação, desative-o.

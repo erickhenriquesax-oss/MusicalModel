@@ -29,7 +29,6 @@ public class SimuladorModel implements Serializable {
     @Column(name = "volume_master")
     private Integer volume_master;
 
-    // Os canais são criados pelo CanalService e removidos junto com o simulador.
     @OneToMany(mappedBy = "simuladorModel", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("idCanal ASC")
     private List<CanalModel> canalModel = new ArrayList<>();

@@ -23,10 +23,6 @@ public class SimuladorService {
         this.canalService = canalService;
     }
 
-    /**
-     * Cria o simulador do usuário recém-cadastrado (volume master 80) e pede ao CanalService os 8 canais.
-     * Roda na mesma transação do cadastro: se algo falhar, nada é gravado.
-     */
     @Transactional
     public SimuladorModel criarSimulador(UsuarioModel usuario) {
         SimuladorModel simulador = new SimuladorModel();

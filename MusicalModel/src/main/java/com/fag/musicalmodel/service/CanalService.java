@@ -13,10 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Canais da mesa de som. São criados aqui quando o simulador nasce (8 canais em 50)
- * e depois só têm os valores e o nome ajustados; tudo fica gravado no banco entre as sessões.
- */
 @Service
 public class CanalService {
 
@@ -29,7 +25,6 @@ public class CanalService {
         this.canalRepository = canalRepository;
     }
 
-    /** Cria os 8 canais do simulador: "Canal 1" a "Canal 8", com agudo, médio, grave e volume em 50. */
     @Transactional
     public List<CanalModel> criarCanaisPadrao(SimuladorModel simulador) {
         List<CanalModel> canais = new ArrayList<>();

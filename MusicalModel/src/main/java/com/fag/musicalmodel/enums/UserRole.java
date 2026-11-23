@@ -4,8 +4,8 @@ public enum UserRole {
     ALUNO(1L, "ROLE_ALUNO"),
     ADMIN(2L, "ROLE_ADMIN");
 
-    private final Long codigo;          // id da tabela tb_tipo_usuario
-    private final String authority;    // usado pelo Spring Security
+    private final Long codigo;
+    private final String authority;
 
     UserRole(Long codigo, String authority) {
         this.codigo = codigo;

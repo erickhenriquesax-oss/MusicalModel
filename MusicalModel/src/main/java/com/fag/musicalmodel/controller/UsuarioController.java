@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,6 +33,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @RestController
@@ -64,11 +66,14 @@ public class UsuarioController {
     })
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDto loginDto) {
 
-        UsernamePasswordAuthenticationToken usuarioAndSenha = new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.senha()); //autentica usando email e senha
+        UsernamePasswordAuthenticationToken usuarioAndSenha = new UsernamePasswordAuthenticationToken(loginDto.email().trim().toLowerCase(Locale.ROOT), loginDto.senha());
         Authentication authentication = authenticationManager.authenticate(usuarioAndSenha);
 
-        UsuarioModel usuario = (UsuarioModel) authentication.getPrincipal(); //pegar o usuario
-        String token = tokenConfig.generateToken(usuario); //gera o token
+        UsuarioModel usuario = (UsuarioModel) authentication.getPrincipal();
+        if (!usuario.isAtivo()) {
+            throw new DisabledException("Usuário desativado");
+        }
+        String token = tokenConfig.generateToken(usuario);
         return ResponseEntity.ok(new LoginResponse(token, usuario));
     }
 

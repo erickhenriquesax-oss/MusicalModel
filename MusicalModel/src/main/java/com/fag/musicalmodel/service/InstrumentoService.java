@@ -10,6 +10,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class InstrumentoService {
@@ -30,7 +31,7 @@ public class InstrumentoService {
     @Transactional
     public InstrumentoModel saveInstrumento(InstrumentoRequestDto instrumentoRequestDto){
         InstrumentoModel instrumento = new InstrumentoModel();
-        instrumento.setNome(instrumentoRequestDto.nome());
+        instrumento.setNome(instrumentoRequestDto.nome().trim().toLowerCase(Locale.ROOT));
         instrumento.setDescricao(instrumentoRequestDto.descricao());
 
         return instrumentoRepository.save(instrumento);
@@ -43,6 +44,6 @@ public class InstrumentoService {
             throw new ResourceNotFoundException("Instrumento não encontrado: " + id);
         }
         instrumentoRepository.deleteById(id);
-        instrumentoRepository.flush(); // aplica já, para que um instrumento em uso vire 409 tratado
+        instrumentoRepository.flush();
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -29,14 +30,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
-                .csrf(httpSecurityCsrfConfigurer ->  httpSecurityCsrfConfigurer.disable())//se for fora do front, desabilita, no caso insominia e talx
+                .csrf(httpSecurityCsrfConfigurer ->  httpSecurityCsrfConfigurer.disable())
                 .cors(cors->cors.configure(http))
-                .sessionManagement(sessionManagement ->sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//sessao não mantem por ser via token
+                .sessionManagement(sessionManagement ->sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers(HttpMethod.POST,"/musicalmodel/usuario/login").permitAll()//nessa não exige autenticação
+                        .requestMatchers(HttpMethod.POST,"/musicalmodel/usuario/login").permitAll()
                         .requestMatchers(HttpMethod.POST,"/musicalmodel/usuario").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) ->
+                                RespostaErro.escrever(response, HttpStatus.UNAUTHORIZED, "Token ausente, inválido ou expirado"))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                RespostaErro.escrever(response, HttpStatus.FORBIDDEN, "Acesso negado: você não tem permissão para esta operação")))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
 

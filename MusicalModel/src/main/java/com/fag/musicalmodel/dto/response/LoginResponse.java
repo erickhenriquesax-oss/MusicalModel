@@ -2,10 +2,6 @@ package com.fag.musicalmodel.dto.response;
 
 import com.fag.musicalmodel.model.UsuarioModel;
 
-/**
- * Resposta do login: o token e os dados que o front guarda para uso interno
- * (identificar o usuário, o papel e o instrumento sem decodificar o JWT).
- */
 public record LoginResponse(
         String token,
         Long idUsuario,

@@ -38,7 +38,6 @@ public class CursoModel implements Serializable {
     @Column(length = 3, nullable = false)
     private int duracao;
 
-    // TEXT: o conteúdo do curso pode ser longo (até 10.000 caracteres, validado no CursoRequestDto)
     @Column(nullable = false, columnDefinition = "TEXT")
     private String conteudo;
 

@@ -18,7 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class UsuarioService {
@@ -56,7 +58,7 @@ public class UsuarioService {
     public UsuarioModel saveUsuario(UsuarioRequestDto usuarioRequestDto) {
         UsuarioModel usuarioModel = new UsuarioModel();
         usuarioModel.setNome(usuarioRequestDto.nome());
-        usuarioModel.setEmail(usuarioRequestDto.email());
+        usuarioModel.setEmail(normalizarEmail(usuarioRequestDto.email()));
         usuarioModel.setSenha(encoder.encode(usuarioRequestDto.senha()));
         usuarioModel.setCpf(usuarioRequestDto.cpf());
         usuarioModel.setAtivo(true);
@@ -71,20 +73,14 @@ public class UsuarioService {
         if (usuarioRequestDto.idInstrumento() != null) {
             usuarioModel.setInstrumentoModel(buscarInstrumento(usuarioRequestDto.idInstrumento()));
         }
-        // Cadastro público: sempre ALUNO, independentemente do que vier no corpo.
         usuarioModel.setTipo_usuario(buscarTipoUsuario(UserRole.ALUNO.getCodigo()));
 
         UsuarioModel usuarioSalvo = usuarioRepository.save(usuarioModel);
 
-        // Usuário -> SimuladorService (cria o simulador) -> CanalService (cria os 8 canais), tudo na mesma transação.
         usuarioSalvo.setSimuladorModel(simuladorService.criarSimulador(usuarioSalvo));
         return usuarioSalvo;
     }
 
-    /**
-     * Define o instrumento gratuito do usuário (tela "Selecione seu Instrumento").
-     * A escolha é permanente: depois de definida, só um ADMIN pode trocá-la.
-     */
     @Transactional
     public UsuarioModel definirInstrumento(Long idUsuario, Long idInstrumento, JWTUserData solicitante) {
         boolean admin = solicitante.isAdmin();
@@ -99,13 +95,12 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    // A listagem de matrículas em cache guarda o nome do usuário: precisa ser limpa quando ele muda.
     @CacheEvict(value = "matriculas", allEntries = true)
     @Transactional
     public UsuarioModel updateUsuario(Long id, UsuarioRequestDto usuarioRequestDto, JWTUserData solicitante) {
         UsuarioModel usuarioUpdate = buscarUsuario(id);
         usuarioUpdate.setNome(usuarioRequestDto.nome());
-        usuarioUpdate.setEmail(usuarioRequestDto.email());
+        usuarioUpdate.setEmail(normalizarEmail(usuarioRequestDto.email()));
         usuarioUpdate.setSenha(encoder.encode(usuarioRequestDto.senha()));
         usuarioUpdate.setCpf(usuarioRequestDto.cpf());
         usuarioUpdate.setCep(usuarioRequestDto.cep());
@@ -117,7 +112,6 @@ public class UsuarioService {
         if (usuarioRequestDto.idInstrumento() != null) {
             usuarioUpdate.setInstrumentoModel(buscarInstrumento(usuarioRequestDto.idInstrumento()));
         }
-        // Só um ADMIN pode trocar o tipo de usuário; para os demais o campo é ignorado.
         if (usuarioRequestDto.idTipoUsuario() != null && solicitante.isAdmin()) {
             usuarioUpdate.setTipo_usuario(buscarTipoUsuario(usuarioRequestDto.idTipoUsuario()));
         }
@@ -146,7 +140,7 @@ public class UsuarioService {
             throw new ResourceNotFoundException("Usuário não encontrado: " + id);
         }
         usuarioRepository.deleteById(id);
-        usuarioRepository.flush(); // aplica já, para que um vínculo (ex.: matrícula) vire 409 tratado
+        usuarioRepository.flush();
     }
 
     private UsuarioModel buscarUsuario(Long id) {
@@ -160,7 +154,15 @@ public class UsuarioService {
     }
 
     private TipoUsuarioModel buscarTipoUsuario(Long id) {
+        boolean tipoValido = Arrays.stream(UserRole.values()).anyMatch(role -> role.getCodigo().equals(id));
+        if (!tipoValido) {
+            throw new ResourceNotFoundException("Tipo de usuário inexistente");
+        }
         return tipoUsuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tipo de usuário não encontrado: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de usuário inexistente"));
+    }
+
+    private String normalizarEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
     }
 }

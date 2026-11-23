@@ -3,10 +3,6 @@ package com.fag.musicalmodel.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-/**
- * Violação de regra de negócio (ex.: matrícula duplicada, usuário desativado).
- * O GlobalExceptionHandler responde com o status informado e {"erro": mensagem}.
- */
 @Getter
 public class BusinessException extends RuntimeException {
 

@@ -26,7 +26,6 @@ public class CursoService {
         this.instrumentoRepository = instrumentoRepository;
     }
 
-    // O cache guarda DTOs com o instrumento já resolvido (sem proxies lazy do Hibernate).
     @Cacheable(value = "cursos")
     @Transactional
     public List<CursoResponseDto> getAllCursos(){
@@ -47,7 +46,6 @@ public class CursoService {
         return new CursoResponseDto(cursoRepository.save(curso));
     }
 
-    // A listagem de matrículas em cache guarda o título do curso: precisa ser limpa quando ele muda.
     @Caching(evict = {
             @CacheEvict(value = "cursos", allEntries = true),
             @CacheEvict(value = "matriculas", allEntries = true)
@@ -81,7 +79,7 @@ public class CursoService {
             throw new ResourceNotFoundException("Curso não encontrado: " + id);
         }
         cursoRepository.deleteById(id);
-        cursoRepository.flush(); // aplica já, para que um curso com matrículas vire 409 tratado
+        cursoRepository.flush();
     }
 
     private CursoModel buscarCurso(Long id) {

@@ -1,7 +1,6 @@
 package com.fag.musicalmodel.controller;
 
 
-import com.fag.musicalmodel.dto.request.TipoUsuarioRequestDto;
 import com.fag.musicalmodel.model.TipoUsuarioModel;
 import com.fag.musicalmodel.service.TipoUsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,20 +38,6 @@ public class TipoUsuarioController {
     })
     public ResponseEntity<List<TipoUsuarioModel>> getAllTipoUsuario(){
         return ResponseEntity.status(HttpStatus.OK).body(tipoUsuarioService.getAllTipoUsuario());
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    @Operation(summary = "Cria tipo de usuário", description = "Cadastra um novo tipo de usuário. Disponível somente para ADMIN.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Tipo de usuário criado", content = @Content(schema = @Schema(implementation = TipoUsuarioModel.class))),
-            @ApiResponse(responseCode = "400", description = "Corpo inválido ou campos obrigatórios ausentes"),
-            @ApiResponse(responseCode = "401", description = "Token ausente, inválido ou expirado"),
-            @ApiResponse(responseCode = "403", description = "Operação permitida somente para ADMIN"),
-            @ApiResponse(responseCode = "409", description = "Já existe um tipo de usuário com esta descrição")
-    })
-    public ResponseEntity<TipoUsuarioModel> saveTipoUsuario(@Valid @RequestBody TipoUsuarioRequestDto tipoUsuarioRequestDto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(tipoUsuarioService.saveTipoUsuario(tipoUsuarioRequestDto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
